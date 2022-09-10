@@ -1,0 +1,12 @@
+# http
+fastapi[all] # https://fastapi.tiangolo.com/#optional-dependencies
+
+# db
+SQLAlchemy
+alembic
+
+# auth
+bcrypt
+
+# linters
+prospector[all]
