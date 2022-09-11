@@ -8,5 +8,4 @@ RUN pip install --no-cache-dir -U -r requirements.txt
 
 COPY . .
 
-CMD [ "uvicorn", "main:api", "--host", "0.0.0.0", "--port", "8000" ]
-
+CMD uvicorn main:api --host 0.0.0.0 --port $API_PORT --reload

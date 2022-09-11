@@ -1,0 +1,7 @@
+version: "3.9"
+services:
+  web:
+    command: uvicorn main:api --host 0.0.0.0 --port $API_PORT
+  api:
+    # TODO: figure out how to serve in prod + get port from env in dev
+    command: npm start

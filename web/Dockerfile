@@ -4,9 +4,8 @@ WORKDIR /usr/src/web
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm install --silent
 
 COPY . .
 
-CMD [ "npm", "start" ]
-
+CMD npm start
