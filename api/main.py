@@ -1,20 +1,25 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
+
+
+from .auth import auth
+from .funding import funding
+from .fundraising import fundraising
+from .lookup import lookup
+from .people import people
+from .social import social
+
 
 api = FastAPI()
 
+# api.add_middleware(...)
+# ...
 
-class User(BaseModel):
-    id: int
-    email: str
-    password: str
-
-
-Users: list[User] = [
-    User(id=1, email="mamod@jogaar.com", password="shouldBeHashed"),
-    User(id=2, email="fatin@jogaar.com", password="shouldBeHashed"),
-    User(id=3, email="jayed@jogaar.com", password="shouldBeHashed"),
-]
+api.include_router(auth.router)
+api.include_router(funding.router)
+api.include_router(fundraising.router)
+api.include_router(lookup.router)
+api.include_router(people.router)
+api.include_router(social.router)
 
 
 @api.get("/")
@@ -22,6 +27,7 @@ async def root():
     return {"message": "it works!"}
 
 
-@api.get("/users")
-async def get_users():
-    return Users
+# TODO cli
+# sourcery skip: remove-empty-nested-block, remove-redundant-if
+if __name__ == "__main__":
+    pass
