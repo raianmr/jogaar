@@ -1,13 +1,12 @@
 from fastapi import FastAPI
 from uvicorn import run
 
-from .config import ENV
-from .auth import auth
-from .funding import funding
-from .fundraising import fundraising
-from .lookup import lookup
-from .people import people
-from .social import social
+from config import ENV
+from auth import auth
+from funding import funding
+from fundraising import fundraising
+from lookup import lookup
+from social import social
 
 api = FastAPI()
 
@@ -18,7 +17,6 @@ api.include_router(auth.router)
 api.include_router(funding.router)
 api.include_router(fundraising.router)
 api.include_router(lookup.router)
-api.include_router(people.router)
 api.include_router(social.router)
 
 
