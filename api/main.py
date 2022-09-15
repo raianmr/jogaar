@@ -1,13 +1,13 @@
 from fastapi import FastAPI
+from uvicorn import run
 
-
+from .config import ENV
 from .auth import auth
 from .funding import funding
 from .fundraising import fundraising
 from .lookup import lookup
 from .people import people
 from .social import social
-
 
 api = FastAPI()
 
@@ -27,7 +27,7 @@ async def root():
     return {"message": "it works!"}
 
 
-# TODO cli
-# sourcery skip: remove-empty-nested-block, remove-redundant-if
+# TODO cli commands
+# TODO fix import errors
 if __name__ == "__main__":
-    pass
+    run("main:api", port=ENV.API_PORT, log_level="info")

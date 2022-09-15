@@ -8,5 +8,8 @@ alembic
 # auth
 bcrypt
 
+# tests
+pytest
+
 # linters
 prospector[all]
