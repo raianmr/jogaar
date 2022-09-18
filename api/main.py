@@ -1,12 +1,8 @@
 from fastapi import FastAPI
 from uvicorn import run
 
-from config import ENV
-from auth import auth
-from funding import funding
-from fundraising import fundraising
-from lookup import lookup
-from social import social
+from config import env
+from logic import auth, funding, fundraising, lookup, social
 
 api = FastAPI()
 
@@ -26,6 +22,5 @@ async def root():
 
 
 # TODO cli commands
-# TODO fix import errors
 if __name__ == "__main__":
-    run("main:api", port=ENV.API_PORT, log_level="info")
+    run("main:api", port=env.API_PORT, log_level="info")
