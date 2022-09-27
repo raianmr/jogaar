@@ -1,26 +1,40 @@
+import uvicorn
 from fastapi import FastAPI
-from uvicorn import run
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.responses import RedirectResponse
 
 from config import env
 from logic import auth, funding, fundraising, lookup, social
 
-api = FastAPI()
+api = FastAPI(
+    title="Jogaar",
+    description="""Jogaar is a crowdfunding platform for future small business owners.""",
+    version="0.0.1",
+)
 
-# api.add_middleware(...)
-# ...
+api.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=["http://localhost:3000"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-api.include_router(auth.router)
-api.include_router(funding.router)
-api.include_router(fundraising.router)
-api.include_router(lookup.router)
-api.include_router(social.router)
+for router in [
+    auth.router,
+    funding.router,
+    fundraising.router,
+    lookup.router,
+    social.router,
+]:
+    api.include_router(router)
 
 
 @api.get("/")
 async def root():
-    return {"message": "it works!"}
+    return RedirectResponse(api.docs_url) if api.docs_url else {"message": "no docs"}
 
 
-# TODO cli commands
+# TODO cli
 if __name__ == "__main__":
-    run("main:api", port=env.API_PORT, log_level="info")
+    uvicorn.run("main:api", port=env.API_PORT, log_level="info")
