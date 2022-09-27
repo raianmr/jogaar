@@ -1,12 +1,17 @@
-from data import user
+from data.auth import user
+from data.auth.user import User, UserCreate, UserRead
 from data.session import get_db
-from data.user import User, UserCreate, UserRead
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from .security import hash_password
+# TODO access guards
+
 
 router = APIRouter()
+
+
+def hash_password(password: str) -> str:
+    return password
 
 
 @router.post("/users", status_code=status.HTTP_201_CREATED)

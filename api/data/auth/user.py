@@ -1,11 +1,11 @@
-from datetime import datetime
-from .base import Base
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import Column, String
 from sqlalchemy.orm import Session
 
+from ..base import Base, BaseRead
 
-class User(Base):  # type: ignore
+
+class User(Base):  
     name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
@@ -21,30 +21,37 @@ class UserCreate(BaseModel):
     password: str
 
 
-class UserRead(BaseModel):
-    id: int
-    email: EmailStr
-
+class UserRead(BaseRead):
     name: str
+    email: EmailStr
     about: str | None
     contact: str | None
     address: str | None
 
-    created_at: datetime
 
-    class Config:
-        orm_mode = True
+class UserUpdate(BaseModel):
+    name: str | None
+    email: EmailStr | None
+    password: str | None
+    about: str | None
+    contact: str | None
+    address: str | None
 
 
-def read_by_email(email: str, db: Session):
+def read_by_email(email: str, db: Session) -> User | None:
     return db.query(User).filter(User.email == email).first()
 
-def read_all(limit: int, offset: int, db: Session):
+
+def read_all(limit: int, offset: int, db: Session) -> list[User]:
     return db.query(User).limit(limit).offset(offset).all()
 
-def create(u: UserCreate, db: Session):
-    new_u = User(**u.dict())
+
+def create(u: UserCreate, db: Session) -> User:
+    new_u = User(**u.dict())   # type: ignore
+
     db.add(new_u)
     db.commit()
     db.refresh(new_u)
     return new_u
+
+
