@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Session
 
-from ..base import Base, BaseRead
+from app.data.base import Base, BaseRead
 
 
 class Vote(Base):

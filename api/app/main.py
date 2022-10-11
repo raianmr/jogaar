@@ -3,16 +3,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 
-from config import env
-from logic import auth, funding, fundraising, lookup, social
+from app.config import env
+from app.logic import auth, funding, fundraising, lookup, social
 
-api = FastAPI(
+app = FastAPI(
     title="Jogaar",
     description="""Jogaar is a crowdfunding platform for future small business owners.""",
     version="0.0.1",
 )
 
-api.add_middleware(
+app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
     allow_origins=["http://localhost:3000"],
@@ -27,12 +27,12 @@ for router in [
     lookup.router,
     social.router,
 ]:
-    api.include_router(router)
+    app.include_router(router)
 
 
-@api.get("/")
-async def root():
-    return RedirectResponse(api.docs_url) if api.docs_url else {"message": "no docs"}
+@app.get("/")
+async def root() -> RedirectResponse | dict[str, str]:
+    return RedirectResponse(app.docs_url) if app.docs_url else {"message": "no docs"}
 
 
 # TODO cli

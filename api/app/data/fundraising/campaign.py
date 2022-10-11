@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from sqlalchemy import TIMESTAMP, Column, ForeignKey, Integer, String, text
 from sqlalchemy.orm import Session
 
-from ..base import Base, BaseRead
+from app.data.base import Base, BaseRead
 
 
 class Campaign(Base):

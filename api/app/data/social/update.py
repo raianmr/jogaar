@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, text
 from sqlalchemy.orm import Session
 
-from ..base import Base, BaseRead
+from app.data.base import Base, BaseRead
 
 
 class Update(Base):
