@@ -1,8 +1,3 @@
-# for development (uses docker-compose.yml and docker-compose.override.yml): 
-# docker compose --env-file .env.dev up -d  
-# for production (uses docker-compose.yml and docker-compose.prod.yml)
-# docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up -d
-
 version: "3.9"
 services:
   web:
@@ -35,9 +30,9 @@ services:
     ports:
       - "$DB_PORT:$DB_PORT"
     environment:
-      - POSTGRES_DB=$DB_NAME
       - POSTGRES_USER=$DB_USER
       - POSTGRES_PASSWORD=$DB_PASS
+      - POSTGRES_DB=$DB_NAME
     volumes:
       - db-vol:/var/lib/postgresql/data
 volumes:

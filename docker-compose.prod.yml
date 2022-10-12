@@ -1,6 +1,13 @@
 version: "3.9"
 services:
   web:
+    env_file:
+      - ./.env.prod
     command: bash -c "npm run build && npx serve build --listen $WEB_PORT"
   api:
+    env_file:
+      - ./.env.prod
     command: uvicorn app.main:app --host 0.0.0.0 --port $API_PORT
+  db:
+    env_file:
+      - ./.env.prod

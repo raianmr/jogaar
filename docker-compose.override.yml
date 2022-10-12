@@ -1,8 +1,15 @@
 version: "3.9"
 services:
   web:
+    env_file:
+      - ./.env.dev
     volumes:
       - ./web:/usr/src/web:ro
   api:
+    env_file:
+      - ./.env.dev
     volumes:
       - ./api:/usr/src/api:ro
+  db:
+    env_file:
+      - ./.env.dev
