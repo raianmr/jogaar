@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from . import replies, updates, votes
 
-router = APIRouter(tags=["Social"])
+router = APIRouter(tags=["Social [WIP]"])
 
 router.include_router(replies.router)
 router.include_router(updates.router)

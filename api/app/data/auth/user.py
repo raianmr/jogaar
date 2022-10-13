@@ -40,10 +40,11 @@ class UserUpdate(BaseModel):
 
 def create(u: UserCreate, db: Session) -> User:
     new_u = User(**u.dict())  # type: ignore
-
     db.add(new_u)
+
     db.commit()
     db.refresh(new_u)
+
     return new_u
 
 
@@ -60,10 +61,12 @@ def read_all(limit: int, offset: int, db: Session) -> list[User]:
 
 
 def update(id: int, u: UserUpdate, db: Session) -> None:
-    db.query(User).filter(User.id == id).update(**u.dict())
+    db.query(User).filter(User.id == id).update(u.dict(exclude_unset=True))
 
     db.commit()
 
 
 def delete(id: int, db: Session) -> None:
     db.query(User).filter(User.id == id).delete()
+
+    db.commit()

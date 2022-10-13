@@ -37,4 +37,4 @@ async def root() -> RedirectResponse | dict[str, str]:
 
 # TODO cli
 if __name__ == "__main__":
-    uvicorn.run("main:api", port=env.API_PORT, log_level="info")
+    uvicorn.run("main:app", port=env.API_PORT, log_level="info")

@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from . import campaigns, faqs, milestones, rewards, tags
 
-router = APIRouter(tags=["Fundraising"])
+router = APIRouter(tags=["Fundraising [WIP]"])
 
 router.include_router(campaigns.router)
 router.include_router(faqs.router)
