@@ -38,6 +38,11 @@ class UserUpdate(BaseModel):
     address: str | None
 
 
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+
 def create(u: UserCreate, db: Session) -> User:
     new_u = User(**u.dict())  # type: ignore
     db.add(new_u)

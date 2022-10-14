@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     WEB_PORT: str = ""
     API_PORT: str = ""
 
+    ALGORITHM: str = ""
+    SECRET_KEY: str = ""
+    EXPIRE_DELTA: int = 0
+
     class Config:
         case_sensitive = False
 
