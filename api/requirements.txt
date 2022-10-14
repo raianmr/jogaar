@@ -7,8 +7,8 @@ psycopg2
 alembic
 
 # auth
-cryptography
-bcrypt
+python-jose[cryptography]
+passlib[bcrypt]
 
 # tests
 pytest

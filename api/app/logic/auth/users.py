@@ -1,6 +1,7 @@
 from app.data.auth import user
 from app.data.auth.user import User, UserCreate, UserRead, UserUpdate
 from app.data.session import get_db
+from app.logic.auth.login import hash
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
@@ -9,10 +10,6 @@ from sqlalchemy.orm import Session
 
 
 router = APIRouter()
-
-
-def hash(password: str) -> str:
-    return password
 
 
 class EmailConflictErr(HTTPException):
