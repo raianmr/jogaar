@@ -5,7 +5,7 @@ from app.config import env
 
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
@@ -53,10 +53,14 @@ def verify(plain_password, hashed_password) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def create_access_token(data: dict) -> str:
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
 
-    expire = datetime.utcnow() + timedelta(minutes=env.EXPIRE_DELTA)
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=env.ACCESS_TOKEN_EXPIRE_MINUTES)
+
     to_encode.update({"exp": expire})
 
     encoded_jwt = jwt.encode(to_encode, env.SECRET_KEY, algorithm=env.ALGORITHM)
@@ -64,13 +68,12 @@ def create_access_token(data: dict) -> str:
     return encoded_jwt
 
 
-def verify_access_token(token: str):
-
+def verify_access_token(token: str) -> TokenData:
     try:
         payload = jwt.decode(token, env.SECRET_KEY, algorithms=[env.ALGORITHM])
         id = payload.get("user_id")
 
-        if id is None:
+        if not id:
             raise UnauthorizedErr
 
         token_data = TokenData(id=id)
@@ -92,9 +95,11 @@ def get_current_user(
     return existing_u
 
 
-@router.post("/login")
-async def login(creds: UserLogin, db: Session = Depends(get_db)) -> dict:
-    existing_u = user.read_by_email(creds.email, db)
+@router.post("/login", response_model=Token)
+async def login(
+    creds: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+) -> dict:
+    existing_u = user.read_by_email(creds.username, db)
 
     if not existing_u:
         raise InvalidCredsErr
@@ -105,3 +110,8 @@ async def login(creds: UserLogin, db: Session = Depends(get_db)) -> dict:
     access_token = create_access_token(data={"user_id": existing_u.id})
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+# @router.get("/protected_hi")
+# async def protected_hi(current_user: User = Depends(get_current_user)):
+#     return "Hi! How are you? You are in a protected Zone."

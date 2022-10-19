@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     ALGORITHM: str = ""
     SECRET_KEY: str = ""
-    EXPIRE_DELTA: int = 0
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 0
 
     class Config:
         case_sensitive = False

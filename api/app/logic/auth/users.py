@@ -1,7 +1,7 @@
 from app.data.auth import user
 from app.data.auth.user import User, UserCreate, UserRead, UserUpdate
 from app.data.session import get_db
-from app.logic.auth.login import hash
+from app.logic.auth.login import hash, get_current_user, UnauthorizedErr
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
@@ -41,11 +41,19 @@ async def create_user(u: UserCreate, db: Session = Depends(get_db)) -> User:
 
 
 @router.put("/users/{id}", response_model=UserRead)
-async def update_user(id: int, u: UserUpdate, db: Session = Depends(get_db)) -> User:
+async def update_user(
+    id: int,
+    u: UserUpdate,
+    db: Session = Depends(get_db),
+    curr_u: User = Depends(get_current_user),
+) -> User:
     existing_u = user.read(id, db)
 
     if not existing_u:
         raise UserNotFoundErr
+
+    if existing_u.id != curr_u.id:
+        raise UnauthorizedErr
 
     try:
         user.update(id, u, db)
@@ -58,11 +66,18 @@ async def update_user(id: int, u: UserUpdate, db: Session = Depends(get_db)) -> 
 
 
 @router.delete("/users/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(id: int, db: Session = Depends(get_db)) -> None:
+async def delete_user(
+    id: int,
+    db: Session = Depends(get_db),
+    curr_u: User = Depends(get_current_user),
+) -> None:
     existing_u = user.read(id, db)
 
     if not existing_u:
         raise UserNotFoundErr
+
+    if existing_u.id != curr_u.id:
+        raise UnauthorizedErr
 
     user.delete(id, db)
 
