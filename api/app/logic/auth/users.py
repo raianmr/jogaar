@@ -1,7 +1,7 @@
 from app.data.auth import user
 from app.data.auth.user import User, UserCreate, UserRead, UserUpdate
 from app.data.session import get_db
-from app.logic.auth.login import hash, get_current_user, UnauthorizedErr
+from app.logic.auth.login import hash_password, get_current_user, UnauthorizedErr
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
@@ -31,7 +31,7 @@ class UserNotFoundErr(HTTPException):
 @router.post("/users", status_code=status.HTTP_201_CREATED, response_model=UserRead)
 async def create_user(u: UserCreate, db: Session = Depends(get_db)) -> User:
     try:
-        u.password = hash(u.password)
+        u.password = hash_password(u.password)
         new_u = user.create(u, db)
 
     except IntegrityError:
