@@ -108,7 +108,7 @@ def test_read_users(
         (
             AUTHORIZED_USER_ID + 1,
             {"contact": "01696969420"},
-            status.HTTP_401_UNAUTHORIZED,
+            status.HTTP_403_FORBIDDEN,
         ),
     ],
 )
@@ -136,7 +136,7 @@ def test_update_user(
     [
         (AUTHORIZED_USER_ID, status.HTTP_204_NO_CONTENT),
         (len(DUMMY_USERS_DATA) * 2, status.HTTP_404_NOT_FOUND),
-        (AUTHORIZED_USER_ID + 1, status.HTTP_401_UNAUTHORIZED),
+        (AUTHORIZED_USER_ID + 1, status.HTTP_403_FORBIDDEN),
     ],
 )
 def test_delete_user(
@@ -155,8 +155,8 @@ def test_delete_user(
             DUMMY_USERS_DATA[0]["password"],
             status.HTTP_200_OK,
         ),
-        (DUMMY_USERS_DATA[0]["email"], "wrong password", status.HTTP_403_FORBIDDEN),
-        ("wrong username", DUMMY_USERS_DATA[0]["password"], status.HTTP_403_FORBIDDEN),
+        (DUMMY_USERS_DATA[0]["email"], "wrong password", status.HTTP_401_UNAUTHORIZED),
+        ("wrong username", DUMMY_USERS_DATA[0]["password"], status.HTTP_401_UNAUTHORIZED),
     ],
 )
 def test_login_user(

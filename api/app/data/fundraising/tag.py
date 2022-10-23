@@ -1,10 +1,7 @@
-from datetime import datetime
-
+from app.data.base import Base, BaseRead
 from pydantic import BaseModel
 from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Session
-
-from app.data.base import Base, BaseRead
 
 
 class Tag(Base):
@@ -43,15 +40,9 @@ def read(id: int, db: Session) -> Tag | None:
     return db.query(Tag).filter(Tag.id == id).first()
 
 
-def read_all_by_campaign(
-    c_id: int, limit: int, offset: int, db: Session
-) -> list[Tag]:
+def read_all_by_campaign(c_id: int, limit: int, offset: int, db: Session) -> list[Tag]:
     return (
-        db.query(Tag)
-        .filter(Tag.campaign_id == c_id)
-        .limit(limit)
-        .offset(offset)
-        .all()
+        db.query(Tag).filter(Tag.campaign_id == c_id).limit(limit).offset(offset).all()
     )
 
 

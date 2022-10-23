@@ -1,8 +1,7 @@
+from app.data.base import Base, BaseRead
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import Column, String
 from sqlalchemy.orm import Session
-
-from app.data.base import Base, BaseRead
 
 
 class User(Base):
@@ -36,11 +35,6 @@ class UserUpdate(BaseModel):
     about: str | None
     contact: str | None
     address: str | None
-
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
 
 
 def create(u: UserCreate, db: Session) -> User:

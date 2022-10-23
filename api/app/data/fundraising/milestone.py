@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from app.data.base import Base, BaseRead
 from pydantic import BaseModel
 from sqlalchemy import (
     TIMESTAMP,
@@ -11,8 +12,6 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy.orm import Session
-
-from app.data.base import Base, BaseRead
 
 
 class Milestone(Base):
@@ -64,9 +63,15 @@ def read(id: int, db: Session) -> Milestone | None:
     return db.query(Milestone).filter(Milestone.id == id).first()
 
 
-def read_all_by_campaign(c_id: int, limit: int, offset: int, db: Session) -> list[Milestone]:
+def read_all_by_campaign(
+    c_id: int, limit: int, offset: int, db: Session
+) -> list[Milestone]:
     return (
-        db.query(Milestone).filter(Milestone.campaign_id == c_id).limit(limit).offset(offset).all()
+        db.query(Milestone)
+        .filter(Milestone.campaign_id == c_id)
+        .limit(limit)
+        .offset(offset)
+        .all()
     )
 
 

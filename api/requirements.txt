@@ -14,5 +14,6 @@ passlib[bcrypt]
 pytest
 
 # linting
+isort
 prospector[all]
 sqlalchemy[mypy] # https://docs.sqlalchemy.org/en/14/orm/extensions/mypy.html

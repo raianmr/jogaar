@@ -1,10 +1,9 @@
 from datetime import datetime
 
+from app.data.base import Base, BaseRead
 from pydantic import BaseModel
 from sqlalchemy import TIMESTAMP, Column, ForeignKey, Integer, String, text
 from sqlalchemy.orm import Session
-
-from app.data.base import Base, BaseRead
 
 # from app.data.auth import User
 
@@ -83,8 +82,8 @@ def read_all(limit: int, offset: int, db: Session) -> list[Campaign]:
     return db.query(Campaign).limit(limit).offset(offset).all()
 
 
-def update(id: int, u: CampaignUpdate, db: Session) -> None:
-    db.query(Campaign).filter(Campaign.id == id).update(u.dict(exclude_unset=True))
+def update(id: int, c: CampaignUpdate, db: Session) -> None:
+    db.query(Campaign).filter(Campaign.id == id).update(c.dict(exclude_unset=True))
 
     db.commit()
 

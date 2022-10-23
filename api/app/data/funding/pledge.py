@@ -1,12 +1,13 @@
+from app.data.base import Base, BaseRead
 from pydantic import BaseModel
 from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Session
 
-from app.data.base import Base, BaseRead
-
 
 class Pledge(Base):
-    pledger_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    pledger_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     campaign_id = Column(
         Integer, ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
     )
@@ -28,4 +29,3 @@ class PledgeRead(BaseRead):
 
 class PledgeUpdate(BaseModel):
     amount: int | None
-

@@ -7,7 +7,6 @@ from sqlalchemy.orm import as_declarative, declared_attr
 
 # TODO enforce char limit
 # TODO explore sqlalchemy relationships
-# TODO get dataclasses to work with sqlalchemy models
 
 
 @as_declarative()

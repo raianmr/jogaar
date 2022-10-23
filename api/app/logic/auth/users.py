@@ -1,9 +1,9 @@
 from app.data.auth import user
 from app.data.auth.user import User, UserCreate, UserRead, UserUpdate
 from app.data.session import get_db
-from app.logic.auth.login import hash_password, get_current_user, UnauthorizedErr
+from app.logic.auth.login import NotAllowedErr, get_current_user, hash_password
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.exc import IntegrityError, OperationalError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 # TODO access guards
@@ -24,7 +24,7 @@ class UserNotFoundErr(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="user with given id was not found",
+            detail="user was not found",
         )
 
 
@@ -46,14 +46,14 @@ async def update_user(
     u: UserUpdate,
     db: Session = Depends(get_db),
     curr_u: User = Depends(get_current_user),
-) -> User:
+) -> User | None:
     existing_u = user.read(id, db)
 
     if not existing_u:
         raise UserNotFoundErr
 
     if existing_u.id != curr_u.id:
-        raise UnauthorizedErr
+        raise NotAllowedErr
 
     try:
         # FIX tests for this part
@@ -66,7 +66,7 @@ async def update_user(
     except IntegrityError:
         raise EmailConflictErr
 
-    return updated_u  # type: ignore
+    return updated_u
 
 
 @router.delete("/users/{id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -81,7 +81,7 @@ async def delete_user(
         raise UserNotFoundErr
 
     if existing_u.id != curr_u.id:
-        raise UnauthorizedErr
+        raise NotAllowedErr
 
     user.delete(id, db)
 

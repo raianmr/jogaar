@@ -1,10 +1,7 @@
-from datetime import datetime
-
-from pydantic import BaseModel, EmailStr
+from app.data.base import Base, BaseRead
+from pydantic import BaseModel
 from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Session
-
-from app.data.base import Base, BaseRead
 
 
 class FAQ(Base):
@@ -38,8 +35,8 @@ class FAQUpdate(BaseModel):
     order: int | None
 
 
-def create(c_id: int, faq: FAQCreate, db: Session) -> FAQ:
-    new_faq = FAQ(campaign_id=c_id, **faq.dict())  # type: ignore
+def create(c_id: int, f: FAQCreate, db: Session) -> FAQ:
+    new_faq = FAQ(campaign_id=c_id, **f.dict())  # type: ignore
     db.add(new_faq)
 
     db.commit()
@@ -62,8 +59,8 @@ def read_all(limit: int, offset: int, db: Session) -> list[FAQ]:
     return db.query(FAQ).limit(limit).offset(offset).all()
 
 
-def update(id: int, u: FAQUpdate, db: Session) -> None:
-    db.query(FAQ).filter(FAQ.id == id).update(u.dict(exclude_unset=True))
+def update(id: int, f: FAQUpdate, db: Session) -> None:
+    db.query(FAQ).filter(FAQ.id == id).update(f.dict(exclude_unset=True))
 
     db.commit()
 

@@ -1,12 +1,13 @@
+from app.data.base import Base, BaseRead
 from pydantic import BaseModel
 from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Session
 
-from app.data.base import Base, BaseRead
-
 
 class Bookmark(Base):
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     campaign_id = Column(
         Integer, ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
     )

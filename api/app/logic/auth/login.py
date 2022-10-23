@@ -1,16 +1,14 @@
-from app.data.auth import user
-from app.data.auth.user import User, UserLogin
-from app.data.session import get_db
-from app.config import env
+from datetime import datetime, timedelta
 
-from pydantic import BaseModel
+from app.config import env
+from app.data.auth import user
+from app.data.session import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from passlib.context import CryptContext
-from sqlalchemy.orm import Session
 from jose import JWTError, jwt
-
-from datetime import datetime, timedelta
+from passlib.context import CryptContext
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -28,20 +26,20 @@ class TokenData(BaseModel):
     id: int | None = None
 
 
-class InvalidCredsErr(HTTPException):
-    def __init__(self) -> None:
-        super().__init__(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="given credentials are invalid",
-        )
-
-
-class UnauthorizedErr(HTTPException):
+class AuthenticatingErr(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"could not validate credentials",
+            detail="given credentials are invalid",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+class NotAllowedErr(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"you're not allowed to do that",
         )
 
 
@@ -74,12 +72,12 @@ def verify_access_token(token: str) -> TokenData:
         id = payload.get("user_id")
 
         if not id:
-            raise UnauthorizedErr
+            raise AuthenticatingErr
 
         token_data = TokenData(id=id)
 
     except JWTError:
-        raise UnauthorizedErr
+        raise AuthenticatingErr
 
     return token_data
 
@@ -102,10 +100,10 @@ async def login_user(
     existing_u = user.read_by_email(creds.username, db)
 
     if not existing_u:
-        raise InvalidCredsErr
+        raise AuthenticatingErr
 
     if not verify_password(creds.password, existing_u.password):  # type: ignore
-        raise InvalidCredsErr
+        raise AuthenticatingErr
 
     access_token = create_access_token(data={"user_id": existing_u.id})
 

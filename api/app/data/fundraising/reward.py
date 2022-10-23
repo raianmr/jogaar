@@ -1,8 +1,7 @@
+from app.data.base import Base, BaseRead
 from pydantic import BaseModel
 from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Session
-
-from app.data.base import Base, BaseRead
 
 
 class Reward(Base):
@@ -50,9 +49,15 @@ def read(id: int, db: Session) -> Reward | None:
     return db.query(Reward).filter(Reward.id == id).first()
 
 
-def read_all_by_campaign(c_id: int, limit: int, offset: int, db: Session) -> list[Reward]:
+def read_all_by_campaign(
+    c_id: int, limit: int, offset: int, db: Session
+) -> list[Reward]:
     return (
-        db.query(Reward).filter(Reward.campaign_id == c_id).limit(limit).offset(offset).all()
+        db.query(Reward)
+        .filter(Reward.campaign_id == c_id)
+        .limit(limit)
+        .offset(offset)
+        .all()
     )
 
 
