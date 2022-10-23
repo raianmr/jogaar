@@ -56,6 +56,10 @@ async def update_user(
         raise UnauthorizedErr
 
     try:
+        # FIX tests for this part
+        if u.password:
+            u.password = hash_password(u.password)
+
         user.update(id, u, db)
         updated_u = user.read(id, db)
 

@@ -49,7 +49,7 @@ def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def verify_password(plain_password, hashed_password) -> bool:
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
@@ -104,7 +104,7 @@ async def login_user(
     if not existing_u:
         raise InvalidCredsErr
 
-    if not verify_password(creds.password, existing_u.password):
+    if not verify_password(creds.password, existing_u.password):  # type: ignore
         raise InvalidCredsErr
 
     access_token = create_access_token(data={"user_id": existing_u.id})

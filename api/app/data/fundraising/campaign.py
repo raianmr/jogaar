@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 
 from app.data.base import Base, BaseRead
 
+# from app.data.auth import User
+
 
 class Campaign(Base):
     campaigner_id = Column(
@@ -51,3 +53,43 @@ class CampaignUpdate(BaseModel):
     title: str | None
     description: str | None
     challenges: str | None
+
+
+def create(u_id: int, c: CampaignCreate, db: Session) -> Campaign:
+    new_c = Campaign(campaigner_id=u_id, **c.dict())  # type: ignore
+    db.add(new_c)
+
+    db.commit()
+    db.refresh(new_c)
+
+    return new_c
+
+
+def read(id: int, db: Session) -> Campaign | None:
+    return db.query(Campaign).filter(Campaign.id == id).first()
+
+
+def read_all_by_user(u_id: int, limit: int, offset: int, db: Session) -> list[Campaign]:
+    return (
+        db.query(Campaign)
+        .filter(Campaign.campaigner_id == u_id)
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
+
+
+def read_all(limit: int, offset: int, db: Session) -> list[Campaign]:
+    return db.query(Campaign).limit(limit).offset(offset).all()
+
+
+def update(id: int, u: CampaignUpdate, db: Session) -> None:
+    db.query(Campaign).filter(Campaign.id == id).update(u.dict(exclude_unset=True))
+
+    db.commit()
+
+
+def delete(id: int, db: Session) -> None:
+    db.query(Campaign).filter(Campaign.id == id).delete()
+
+    db.commit()

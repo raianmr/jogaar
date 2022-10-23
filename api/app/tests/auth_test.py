@@ -9,14 +9,13 @@ from app.tests.conftest import (
     session,
 )  # ignore unused warnings
 from app.logic.auth.login import Token
-from app.config import env
 
 from fastapi import status
 from fastapi.testclient import TestClient
 from pytest import mark
-from jose import jwt
 
 
+# TODO: translate the requirement of hashing passwords into tests
 @mark.parametrize(
     "in_json,out_status",
     [
@@ -25,7 +24,7 @@ from jose import jwt
             status.HTTP_201_CREATED,
         ),
         (
-            DUMMY_USERS_DATA[1],
+            DUMMY_USERS_DATA[0],
             status.HTTP_409_CONFLICT,
         ),
     ],
@@ -87,12 +86,13 @@ def test_read_users(
         _ = UserRead(**resp.json()[0])  # response validation
 
 
+# TODO: account for password changes
 @mark.parametrize(
     "in_id,in_json,out_status",
     [
         (
             AUTHORIZED_USER_ID,
-            {"about": "generic intro", "contact": "01696969420"},
+            {"about": "generic intro", "password": "updated password"},
             status.HTTP_200_OK,
         ),
         (
@@ -107,7 +107,7 @@ def test_read_users(
         ),
         (
             AUTHORIZED_USER_ID + 1,
-            {"password": "updated password"},
+            {"contact": "01696969420"},
             status.HTTP_401_UNAUTHORIZED,
         ),
     ],
@@ -125,9 +125,10 @@ def test_update_user(
 
     if resp.status_code == status.HTTP_200_OK:
         resp_data = resp.json()
-        _ = UserRead(**resp_data)  # response validation
+        resp_validated = UserRead(**resp_data)  # response validation
+        merged_validated = UserRead(**{**resp_data, **in_json})
 
-        assert resp_data | in_json == resp_data  # verify changes
+        assert resp_validated == merged_validated  # verify changes
 
 
 @mark.parametrize(

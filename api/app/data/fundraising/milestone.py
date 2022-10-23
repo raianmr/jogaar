@@ -48,3 +48,39 @@ class MilestoneUpdate(BaseModel):
     title: str | None
     description: str | None
     deadline: datetime | None
+
+
+def create(c_id: int, m: MilestoneCreate, db: Session) -> Milestone:
+    new_m = Milestone(campaign_id=c_id, **m.dict())  # type: ignore
+    db.add(new_m)
+
+    db.commit()
+    db.refresh(new_m)
+
+    return new_m
+
+
+def read(id: int, db: Session) -> Milestone | None:
+    return db.query(Milestone).filter(Milestone.id == id).first()
+
+
+def read_all_by_campaign(c_id: int, limit: int, offset: int, db: Session) -> list[Milestone]:
+    return (
+        db.query(Milestone).filter(Milestone.campaign_id == c_id).limit(limit).offset(offset).all()
+    )
+
+
+def read_all(limit: int, offset: int, db: Session) -> list[Milestone]:
+    return db.query(Milestone).limit(limit).offset(offset).all()
+
+
+def update(id: int, u: MilestoneUpdate, db: Session) -> None:
+    db.query(Milestone).filter(Milestone.id == id).update(u.dict(exclude_unset=True))
+
+    db.commit()
+
+
+def delete(id: int, db: Session) -> None:
+    db.query(Milestone).filter(Milestone.id == id).delete()
+
+    db.commit()
