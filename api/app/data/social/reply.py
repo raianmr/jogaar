@@ -19,15 +19,12 @@ class Reply(Base):
 
 
 class ReplyCreate(BaseModel):
-    update_id: int
-
     content: str
 
 
 class ReplyRead(BaseRead):
     user_id: int
     update_id: int
-    campaign_id: int
 
     content: str
     edited: bool
@@ -35,3 +32,43 @@ class ReplyRead(BaseRead):
 
 class ReplyUpdate(BaseModel):
     content: str
+
+
+def create(_user_id: int, _update_id: int, r: ReplyCreate, db: Session) -> Reply:
+    new_r = Reply(user_id=_user_id, update_id=_update_id, **r.dict())  # type: ignore
+    db.add(new_r)
+
+    db.commit()
+    db.refresh(new_r)
+
+    return new_r
+
+
+def read(id: int, db: Session) -> Reply | None:
+    return db.query(Reply).filter(Reply.id == id).first()
+
+
+def read_all_by_update(u_id: int, limit: int, offset: int, db: Session) -> list[Reply]:
+    return (
+        db.query(Reply)
+        .filter(Reply.update_id == u_id)
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
+
+
+def read_all(limit: int, offset: int, db: Session) -> list[Reply]:
+    return db.query(Reply).limit(limit).offset(offset).all()
+
+
+def update(id: int, u: ReplyUpdate, db: Session) -> None:
+    db.query(Reply).filter(Reply.id == id).update(u.dict(exclude_unset=True))
+
+    db.commit()
+
+
+def delete(id: int, db: Session) -> None:
+    db.query(Reply).filter(Reply.id == id).delete()
+
+    db.commit()

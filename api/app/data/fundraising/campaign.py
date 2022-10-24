@@ -5,8 +5,6 @@ from pydantic import BaseModel
 from sqlalchemy import TIMESTAMP, Column, ForeignKey, Integer, String, text
 from sqlalchemy.orm import Session
 
-# from app.data.auth import User
-
 
 class Campaign(Base):
     campaigner_id = Column(
