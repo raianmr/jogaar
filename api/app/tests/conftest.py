@@ -1,10 +1,8 @@
-from app.config import env
+from app.core.config import env
+from app.core.security import create_access_token
 from app.data import Base, get_db
-from app.data.auth import user
-from app.data.auth.user import User, UserCreate
-from app.logic.auth.login import create_access_token
 from app.main import app
-
+from app.tests.testdata import *
 from fastapi import status
 from fastapi.testclient import TestClient
 from pytest import fixture
@@ -16,25 +14,6 @@ TESTDB_URL = f"{env.DB_TYPE}://{env.DB_USER}:{env.DB_PASS}@{env.DB_HOST}:{env.DB
 
 test_engine = create_engine(TESTDB_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)  # type: ignore
-
-AUTHORIZED_USER_ID = 1
-DUMMY_USERS_DATA = [
-    {
-        "name": "Mahmudur Rahman",
-        "email": "mahmud@jogaar.com",
-        "password": "should_be_hashed",
-    },
-    {
-        "name": "Syed Fateen Navid",
-        "email": "fateen@jogaar.com",
-        "password": "should_be_hashed",
-    },
-    {
-        "name": "Zaed Bin Monir",
-        "email": "zaed@jogaar.com",
-        "password": "should_be_hashed",
-    },
-]
 
 
 @fixture
@@ -62,6 +41,18 @@ def client(session: Session):
 
 
 @fixture
+def token(dummy_users: list[dict]) -> str:
+    return create_access_token({"user_id": AUTHORIZED_USER_ID})
+
+
+@fixture
+def authorized_client(client: TestClient, token: str) -> TestClient:
+    client.headers["Authorization"] = f"Bearer {token}"
+
+    return client
+
+
+@fixture
 def dummy_users(client: TestClient) -> list[dict]:
     # most tests depend on the structure and contents of this list
     # and so changing anything may break them
@@ -81,12 +72,15 @@ def dummy_users(client: TestClient) -> list[dict]:
 
 
 @fixture
-def token(dummy_users: list[dict]) -> str:
-    return create_access_token({"user_id": AUTHORIZED_USER_ID})
+def dummy_campaigns(authorized_client: TestClient) -> list[dict]:
+    resp_data = []
+    for dummy_campaign_data in DUMMY_CAMPAIGNS_DATA:
+        resp = authorized_client.post("/campaigns", json=dummy_campaign_data)
 
+        assert resp.status_code == status.HTTP_201_CREATED
 
-@fixture
-def authorized_client(client: TestClient, token: str) -> TestClient:
-    client.headers["Authorization"] = f"Bearer {token}"
+        merged = {**dummy_campaign_data, **resp.json()}
 
-    return client
+        resp_data.append(merged)
+
+    return resp_data

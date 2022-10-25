@@ -1,15 +1,7 @@
-from app.logic.auth.login import verify_access_token
-from app.data.auth.user import UserRead
-from app.tests.conftest import (
-    authorized_client,
-    AUTHORIZED_USER_ID,
-    client,
-    dummy_users,
-    DUMMY_USERS_DATA,
-    session,
-)  # ignore unused warnings
-from app.logic.auth.login import Token
-
+from app.core.security import Token, verify_access_token
+from app.data.crud.user import UserRead
+from app.tests.conftest import *
+from app.tests.testdata import *
 from fastapi import status
 from fastapi.testclient import TestClient
 from pytest import mark
@@ -156,7 +148,11 @@ def test_delete_user(
             status.HTTP_200_OK,
         ),
         (DUMMY_USERS_DATA[0]["email"], "wrong password", status.HTTP_401_UNAUTHORIZED),
-        ("wrong username", DUMMY_USERS_DATA[0]["password"], status.HTTP_401_UNAUTHORIZED),
+        (
+            "wrong username",
+            DUMMY_USERS_DATA[0]["password"],
+            status.HTTP_401_UNAUTHORIZED,
+        ),
     ],
 )
 def test_login_user(
