@@ -26,7 +26,7 @@ class TagUpdate(BaseModel):
     name: str
 
 
-def create(c_id: int, t: TagCreate, db: Session) -> Tag:
+def create(c_id: int | Column, t: TagCreate, db: Session) -> Tag:
     new_t = Tag(campaign_id=c_id, **t.dict())  # type: ignore
     db.add(new_t)
 
@@ -36,11 +36,11 @@ def create(c_id: int, t: TagCreate, db: Session) -> Tag:
     return new_t
 
 
-def read(id: int, db: Session) -> Tag | None:
+def read(id: int | Column, db: Session) -> Tag | None:
     return db.query(Tag).filter(Tag.id == id).first()
 
 
-def read_all_by_campaign(c_id: int, limit: int, offset: int, db: Session) -> list[Tag]:
+def read_all_by_campaign(c_id: int | Column, limit: int, offset: int, db: Session) -> list[Tag]:
     return (
         db.query(Tag).filter(Tag.campaign_id == c_id).limit(limit).offset(offset).all()
     )
@@ -50,13 +50,13 @@ def read_all(limit: int, offset: int, db: Session) -> list[Tag]:
     return db.query(Tag).limit(limit).offset(offset).all()
 
 
-def update(id: int, u: TagUpdate, db: Session) -> None:
+def update(id: int | Column, u: TagUpdate, db: Session) -> None:
     db.query(Tag).filter(Tag.id == id).update(u.dict(exclude_unset=True))
 
     db.commit()
 
 
-def delete(id: int, db: Session) -> None:
+def delete(id: int | Column, db: Session) -> None:
     db.query(Tag).filter(Tag.id == id).delete()
 
     db.commit()

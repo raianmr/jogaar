@@ -23,7 +23,7 @@ class VoteRead(BaseRead):
     reply_id: int
 
 
-def create(_user_id: int, _reply_id: int, v: VoteCreate, db: Session) -> Vote:
+def create(_user_id: int | Column, _reply_id: int | Column, v: VoteCreate, db: Session) -> Vote:
     new_v = Vote(user_id=_user_id, reply_id=_reply_id, **v.dict())  # type: ignore
     db.add(new_v)
 
@@ -33,17 +33,17 @@ def create(_user_id: int, _reply_id: int, v: VoteCreate, db: Session) -> Vote:
     return new_v
 
 
-def read(id: int, db: Session) -> Vote | None:
+def read(id: int | Column, db: Session) -> Vote | None:
     return db.query(Vote).filter(Vote.id == id).first()
 
 
-def read_all_by_reply(r_id: int, limit: int, offset: int, db: Session) -> list[Vote]:
+def read_all_by_reply(r_id: int | Column, limit: int, offset: int, db: Session) -> list[Vote]:
     return (
         db.query(Vote).filter(Vote.reply_id == r_id).limit(limit).offset(offset).all()
     )
 
 
-def read_score_for_reply(r_id: int, db: Session) -> int:
+def read_score_for_reply(r_id: int | Column, db: Session) -> int:
     return db.query(Vote).filter(Vote.reply_id == r_id).count()
 
 
@@ -51,7 +51,7 @@ def read_all(limit: int, offset: int, db: Session) -> list[Vote]:
     return db.query(Vote).limit(limit).offset(offset).all()
 
 
-def delete(id: int, db: Session) -> None:
+def delete(id: int | Column, db: Session) -> None:
     db.query(Vote).filter(Vote.id == id).delete()
 
     db.commit()

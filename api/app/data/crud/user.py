@@ -59,7 +59,7 @@ def create(u: UserCreate, db: Session) -> User:
     return new_u
 
 
-def read(id: int, db: Session) -> User | None:
+def read(id: int | Column, db: Session) -> User | None:
     return db.query(User).filter(User.id == id).first()
 
 
@@ -71,13 +71,19 @@ def read_all(limit: int, offset: int, db: Session) -> list[User]:
     return db.query(User).limit(limit).offset(offset).all()
 
 
-def update(id: int, u: UserUpdate, db: Session) -> None:
+def update(id: int | Column, u: UserUpdate, db: Session) -> None:
     db.query(User).filter(User.id == id).update(u.dict(exclude_unset=True))
 
     db.commit()
 
 
-def delete(id: int, db: Session) -> None:
+def update_access(id: int | Column, a: Access, db: Session):
+    db.query(User).filter(User.id == id).update({User.access_level: a})
+
+    db.commit()
+
+
+def delete(id: int | Column, db: Session) -> None:
     db.query(User).filter(User.id == id).delete()
 
     db.commit()

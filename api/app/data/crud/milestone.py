@@ -49,7 +49,7 @@ class MilestoneUpdate(BaseModel):
     deadline: datetime | None
 
 
-def create(c_id: int, m: MilestoneCreate, db: Session) -> Milestone:
+def create(c_id: int | Column, m: MilestoneCreate, db: Session) -> Milestone:
     new_m = Milestone(campaign_id=c_id, **m.dict())  # type: ignore
     db.add(new_m)
 
@@ -59,12 +59,12 @@ def create(c_id: int, m: MilestoneCreate, db: Session) -> Milestone:
     return new_m
 
 
-def read(id: int, db: Session) -> Milestone | None:
+def read(id: int | Column, db: Session) -> Milestone | None:
     return db.query(Milestone).filter(Milestone.id == id).first()
 
 
 def read_all_by_campaign(
-    c_id: int, limit: int, offset: int, db: Session
+    c_id: int | Column, limit: int, offset: int, db: Session
 ) -> list[Milestone]:
     return (
         db.query(Milestone)
@@ -79,13 +79,13 @@ def read_all(limit: int, offset: int, db: Session) -> list[Milestone]:
     return db.query(Milestone).limit(limit).offset(offset).all()
 
 
-def update(id: int, u: MilestoneUpdate, db: Session) -> None:
+def update(id: int | Column, u: MilestoneUpdate, db: Session) -> None:
     db.query(Milestone).filter(Milestone.id == id).update(u.dict(exclude_unset=True))
 
     db.commit()
 
 
-def delete(id: int, db: Session) -> None:
+def delete(id: int | Column, db: Session) -> None:
     db.query(Milestone).filter(Milestone.id == id).delete()
 
     db.commit()

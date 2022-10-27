@@ -26,7 +26,7 @@ async def create_campaign(
     curr_u: User = Depends(get_current_valid_user),
 ) -> Campaign:
     try:
-        new_c = campaign.create(curr_u.id, c, db)  # type: ignore
+        new_c = campaign.create(curr_u.id, c, db) 
 
     except IntegrityError:
         raise MiscConflictErr
@@ -56,7 +56,7 @@ async def update_campaign(
     return updated_c
 
 
-@router.put("/campaigns/{id}/start", response_model=CampaignRead)
+@router.post("/campaigns/{id}/start", response_model=CampaignRead)
 async def start_campaign(
     id: int,
     db: Session = Depends(get_db),

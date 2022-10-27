@@ -34,7 +34,7 @@ class ReplyUpdate(BaseModel):
     content: str
 
 
-def create(_user_id: int, _update_id: int, r: ReplyCreate, db: Session) -> Reply:
+def create(_user_id: int | Column, _update_id: int | Column, r: ReplyCreate, db: Session) -> Reply:
     new_r = Reply(user_id=_user_id, update_id=_update_id, **r.dict())  # type: ignore
     db.add(new_r)
 
@@ -44,11 +44,11 @@ def create(_user_id: int, _update_id: int, r: ReplyCreate, db: Session) -> Reply
     return new_r
 
 
-def read(id: int, db: Session) -> Reply | None:
+def read(id: int | Column, db: Session) -> Reply | None:
     return db.query(Reply).filter(Reply.id == id).first()
 
 
-def read_all_by_update(u_id: int, limit: int, offset: int, db: Session) -> list[Reply]:
+def read_all_by_update(u_id: int | Column, limit: int, offset: int, db: Session) -> list[Reply]:
     return (
         db.query(Reply)
         .filter(Reply.update_id == u_id)
@@ -62,7 +62,7 @@ def read_all(limit: int, offset: int, db: Session) -> list[Reply]:
     return db.query(Reply).limit(limit).offset(offset).all()
 
 
-def update(id: int, r: ReplyUpdate, db: Session) -> None:
+def update(id: int | Column, r: ReplyUpdate, db: Session) -> None:
     db.query(Reply).filter(Reply.id == id).update(
         {"edited": True, **r.dict(exclude_unset=True)}
     )
@@ -70,7 +70,7 @@ def update(id: int, r: ReplyUpdate, db: Session) -> None:
     db.commit()
 
 
-def delete(id: int, db: Session) -> None:
+def delete(id: int | Column, db: Session) -> None:
     db.query(Reply).filter(Reply.id == id).delete()
 
     db.commit()

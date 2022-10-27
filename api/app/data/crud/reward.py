@@ -35,7 +35,7 @@ class RewardUpdate(BaseModel):
     pledge: int | None
 
 
-def create(c_id: int, r: RewardCreate, db: Session) -> Reward:
+def create(c_id: int | Column, r: RewardCreate, db: Session) -> Reward:
     new_r = Reward(campaign_id=c_id, **r.dict())  # type: ignore
     db.add(new_r)
 
@@ -45,12 +45,12 @@ def create(c_id: int, r: RewardCreate, db: Session) -> Reward:
     return new_r
 
 
-def read(id: int, db: Session) -> Reward | None:
+def read(id: int | Column, db: Session) -> Reward | None:
     return db.query(Reward).filter(Reward.id == id).first()
 
 
 def read_all_by_campaign(
-    c_id: int, limit: int, offset: int, db: Session
+    c_id: int | Column, limit: int, offset: int, db: Session
 ) -> list[Reward]:
     return (
         db.query(Reward)
@@ -65,13 +65,13 @@ def read_all(limit: int, offset: int, db: Session) -> list[Reward]:
     return db.query(Reward).limit(limit).offset(offset).all()
 
 
-def update(id: int, u: RewardUpdate, db: Session) -> None:
+def update(id: int | Column, u: RewardUpdate, db: Session) -> None:
     db.query(Reward).filter(Reward.id == id).update(u.dict(exclude_unset=True))
 
     db.commit()
 
 
-def delete(id: int, db: Session) -> None:
+def delete(id: int | Column, db: Session) -> None:
     db.query(Reward).filter(Reward.id == id).delete()
 
     db.commit()

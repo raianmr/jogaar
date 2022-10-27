@@ -22,7 +22,7 @@ async def login_user(
     if not existing_u:
         raise AuthenticatingErr
 
-    if not verify_password(creds.password, existing_u.password):  # type: ignore
+    if not verify_password(creds.password, existing_u.password): 
         raise AuthenticatingErr
 
     access_token = create_access_token(data={"user_id": existing_u.id})

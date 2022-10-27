@@ -68,7 +68,7 @@ async def update_faq(
     curr_u: User = Depends(get_current_valid_user),
 ) -> FAQ | None:
     existing_f = get_existing_faq(f_id, db)
-    existing_c = get_existing_campaign(existing_f.campaign_id, db)  # type: ignore
+    existing_c = get_existing_campaign(existing_f.campaign_id, db) 
 
     if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
@@ -93,7 +93,7 @@ async def delete_faq(
     curr_u: User = Depends(get_current_valid_user),
 ):
     existing_f = get_existing_faq(f_id, db)
-    existing_c = get_existing_campaign(existing_f.campaign_id, db)  # type: ignore
+    existing_c = get_existing_campaign(existing_f.campaign_id, db) 
 
     if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr

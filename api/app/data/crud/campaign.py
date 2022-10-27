@@ -65,7 +65,7 @@ class CampaignUpdate(BaseModel):
     challenges: str | None
 
 
-def create(u_id: int, c: CampaignCreate, db: Session) -> Campaign:
+def create(u_id: int | Column, c: CampaignCreate, db: Session) -> Campaign:
     new_c = Campaign(campaigner_id=u_id, **c.dict())  # type: ignore
     db.add(new_c)
 
@@ -75,11 +75,11 @@ def create(u_id: int, c: CampaignCreate, db: Session) -> Campaign:
     return new_c
 
 
-def read(id: int, db: Session) -> Campaign | None:
+def read(id: int | Column, db: Session) -> Campaign | None:
     return db.query(Campaign).filter(Campaign.id == id).first()
 
 
-def read_all_by_user(u_id: int, limit: int, offset: int, db: Session) -> list[Campaign]:
+def read_all_by_user(u_id: int | Column, limit: int, offset: int, db: Session) -> list[Campaign]:
     return (
         db.query(Campaign)
         .filter(Campaign.campaigner_id == u_id)
@@ -93,19 +93,19 @@ def read_all(limit: int, offset: int, db: Session) -> list[Campaign]:
     return db.query(Campaign).limit(limit).offset(offset).all()
 
 
-def update(id: int, c: CampaignUpdate, db: Session) -> None:
+def update(id: int | Column, c: CampaignUpdate, db: Session) -> None:
     db.query(Campaign).filter(Campaign.id == id).update(c.dict(exclude_unset=True))
 
     db.commit()
 
 
-def update_state(id: int, s: State, db: Session):
+def update_state(id: int | Column, s: State, db: Session):
     db.query(Campaign).filter(Campaign.id == id).update({Campaign.current_state: s})
 
     db.commit()
 
 
-def delete(id: int, db: Session) -> None:
+def delete(id: int | Column, db: Session) -> None:
     db.query(Campaign).filter(Campaign.id == id).delete()
 
     db.commit()

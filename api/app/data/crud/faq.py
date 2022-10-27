@@ -35,7 +35,7 @@ class FAQUpdate(BaseModel):
     order: int | None
 
 
-def create(c_id: int, f: FAQCreate, db: Session) -> FAQ:
+def create(c_id: int | Column, f: FAQCreate, db: Session) -> FAQ:
     new_faq = FAQ(campaign_id=c_id, **f.dict())  # type: ignore
     db.add(new_faq)
 
@@ -45,11 +45,11 @@ def create(c_id: int, f: FAQCreate, db: Session) -> FAQ:
     return new_faq
 
 
-def read(id: int, db: Session) -> FAQ | None:
+def read(id: int | Column, db: Session) -> FAQ | None:
     return db.query(FAQ).filter(FAQ.id == id).first()
 
 
-def read_all_by_campaign(c_id: int, limit: int, offset: int, db: Session) -> list[FAQ]:
+def read_all_by_campaign(c_id: int | Column, limit: int, offset: int, db: Session) -> list[FAQ]:
     return (
         db.query(FAQ).filter(FAQ.campaign_id == c_id).limit(limit).offset(offset).all()
     )
@@ -59,13 +59,13 @@ def read_all(limit: int, offset: int, db: Session) -> list[FAQ]:
     return db.query(FAQ).limit(limit).offset(offset).all()
 
 
-def update(id: int, f: FAQUpdate, db: Session) -> None:
+def update(id: int | Column, f: FAQUpdate, db: Session) -> None:
     db.query(FAQ).filter(FAQ.id == id).update(f.dict(exclude_unset=True))
 
     db.commit()
 
 
-def delete(id: int, db: Session) -> None:
+def delete(id: int | Column, db: Session) -> None:
     db.query(FAQ).filter(FAQ.id == id).delete()
 
     db.commit()

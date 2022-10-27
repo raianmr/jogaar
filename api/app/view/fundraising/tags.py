@@ -68,7 +68,7 @@ async def update_tag(
     curr_u: User = Depends(get_current_valid_user),
 ) -> Tag | None:
     existing_t = get_existing_tag(t_id, db)
-    existing_c = get_existing_campaign(existing_t.campaign_id, db)  # type: ignore
+    existing_c = get_existing_campaign(existing_t.campaign_id, db)  
 
     if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
@@ -93,7 +93,7 @@ async def delete_tag(
     curr_u: User = Depends(get_current_valid_user),
 ) -> None:
     existing_t = get_existing_tag(t_id, db)
-    existing_c = get_existing_campaign(existing_t.campaign_id, db)  # type: ignore
+    existing_c = get_existing_campaign(existing_t.campaign_id, db) 
 
     if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr

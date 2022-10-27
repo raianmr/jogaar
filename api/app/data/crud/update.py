@@ -32,7 +32,7 @@ class UpdateUpdate(BaseModel):
     content: str | None
 
 
-def create(c_id: int, u: UpdateCreate, db: Session) -> Update:
+def create(c_id: int | Column, u: UpdateCreate, db: Session) -> Update:
     new_u = Update(campaign_id=c_id, **u.dict())  # type: ignore
     db.add(new_u)
 
@@ -42,12 +42,12 @@ def create(c_id: int, u: UpdateCreate, db: Session) -> Update:
     return new_u
 
 
-def read(id: int, db: Session) -> Update | None:
+def read(id: int | Column, db: Session) -> Update | None:
     return db.query(Update).filter(Update.id == id).first()
 
 
 def read_all_by_campaign(
-    c_id: int, limit: int, offset: int, db: Session
+    c_id: int | Column, limit: int, offset: int, db: Session
 ) -> list[Update]:
     return (
         db.query(Update)
@@ -62,7 +62,7 @@ def read_all(limit: int, offset: int, db: Session) -> list[Update]:
     return db.query(Update).limit(limit).offset(offset).all()
 
 
-def update(id: int, u: UpdateUpdate, db: Session) -> None:
+def update(id: int | Column, u: UpdateUpdate, db: Session) -> None:
     db.query(Update).filter(Update.id == id).update(
         {"edited": True, **u.dict(exclude_unset=True)}
     )
@@ -70,7 +70,7 @@ def update(id: int, u: UpdateUpdate, db: Session) -> None:
     db.commit()
 
 
-def delete(id: int, db: Session) -> None:
+def delete(id: int | Column, db: Session) -> None:
     db.query(Update).filter(Update.id == id).delete()
 
     db.commit()
