@@ -7,7 +7,7 @@ from app.data.crud import user
 from app.data.crud.campaign import Campaign, State
 from app.data.crud.user import Access, User
 from app.data.session import get_db
-from fastapi import Depends, HTTPException, Path, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -144,7 +144,7 @@ def _(c: Campaign, curr_u: User) -> bool:
     if is_super(curr_u):
         return True
 
-    if c.campaigner_id == curr_u.id:
+    if c.campaigner_id == curr_u.id and c.current_state != State.LOCKED:
         return True
 
     return False

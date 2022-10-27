@@ -1,6 +1,6 @@
-from app.core.campaigning import CampaignNotFoundErr
-from app.core.security import NotAllowedErr, get_current_valid_user
-from app.data.crud import campaign, milestone
+from app.core.campaigning import get_existing_campaign
+from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
+from app.data.crud import milestone
 from app.data.crud.milestone import (
     Milestone,
     MilestoneCreate,
@@ -32,6 +32,14 @@ class MilestoneNotFoundErr(HTTPException):
         )
 
 
+def get_existing_milestone(milestone_id: int, db: Session) -> Milestone:
+    existing_m = milestone.read(milestone_id, db)
+    if not existing_m:
+        raise MilestoneNotFoundErr
+
+    return existing_m
+
+
 @router.post(
     "/campaigns/{c_id}/milestones",
     status_code=status.HTTP_201_CREATED,
@@ -43,12 +51,9 @@ async def create_milestone(
     db: Session = Depends(get_db),
     curr_u: User = Depends(get_current_valid_user),
 ) -> Milestone:
-    existing_c = campaign.read(c_id, db)
+    existing_c = get_existing_campaign(c_id, db)
 
-    if not existing_c:
-        raise CampaignNotFoundErr
-
-    if existing_c.campaigner_id != curr_u.id:
+    if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
 
     try:
@@ -67,17 +72,10 @@ async def update_milestone(
     db: Session = Depends(get_db),
     curr_u: User = Depends(get_current_valid_user),
 ) -> Milestone | None:
-    existing_m = milestone.read(m_id, db)
+    existing_m = get_existing_milestone(m_id, db)
+    existing_c = get_existing_campaign(existing_m.campaign_id, db)  # type: ignore
 
-    if not existing_m:
-        raise MilestoneNotFoundErr
-
-    existing_c = campaign.read(existing_m.campaign_id, db)  # type: ignore
-
-    if not existing_c:
-        raise CampaignNotFoundErr
-
-    if existing_c.campaigner_id != curr_u.id:
+    if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
 
     try:
@@ -99,17 +97,10 @@ async def delete_milestone(
     db: Session = Depends(get_db),
     curr_u: User = Depends(get_current_valid_user),
 ) -> None:
-    existing_m = milestone.read(m_id, db)
+    existing_m = get_existing_milestone(m_id, db)
+    existing_c = get_existing_campaign(existing_m.campaign_id, db)  # type: ignore
 
-    if not existing_m:
-        raise MilestoneNotFoundErr
-
-    existing_c = campaign.read(existing_m.campaign_id, db)  # type: ignore
-
-    if not existing_c:
-        raise CampaignNotFoundErr
-
-    if existing_c.campaigner_id != curr_u.id:
+    if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
 
     milestone.delete(m_id, db)
@@ -117,10 +108,7 @@ async def delete_milestone(
 
 @router.get("/milestones/{m_id}", response_model=MilestoneRead)
 async def read_milestone(m_id: int, db: Session = Depends(get_db)) -> Milestone:
-    existing_m = milestone.read(m_id, db)
-
-    if not existing_m:
-        raise MilestoneNotFoundErr
+    existing_m = get_existing_milestone(m_id, db)
 
     return existing_m
 

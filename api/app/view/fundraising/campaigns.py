@@ -1,11 +1,12 @@
-from app.core.campaigning import CampaignNotFoundErr, MiscConflictErr
-from app.core.security import NotAllowedErr, get_current_valid_user
+from app.core.campaigning import MiscConflictErr, get_existing_campaign
+from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
 from app.data.crud import campaign
 from app.data.crud.campaign import (
     Campaign,
     CampaignCreate,
     CampaignRead,
     CampaignUpdate,
+    State,
 )
 from app.data.crud.user import User
 from app.data.session import get_db
@@ -40,16 +41,34 @@ async def update_campaign(
     db: Session = Depends(get_db),
     curr_u: User = Depends(get_current_valid_user),
 ) -> Campaign | None:
-    existing_c = campaign.read(id, db)
+    existing_c = get_existing_campaign(id, db)
 
-    if not existing_c:
-        raise CampaignNotFoundErr
-
-    if existing_c.campaigner_id != curr_u.id:
+    if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
 
     try:
         campaign.update(id, c, db)
+        updated_c = campaign.read(id, db)
+
+    except IntegrityError:
+        raise MiscConflictErr
+
+    return updated_c
+
+
+@router.put("/campaigns/{id}/start", response_model=CampaignRead)
+async def start_campaign(
+    id: int,
+    db: Session = Depends(get_db),
+    curr_u: User = Depends(get_current_valid_user),
+) -> Campaign | None:
+    existing_c = get_existing_campaign(id, db)
+
+    if not has_access_over(existing_c, curr_u):
+        raise NotAllowedErr
+
+    try:
+        campaign.update_state(id, State.STARTED, db)
         updated_c = campaign.read(id, db)
 
     except IntegrityError:
@@ -64,12 +83,9 @@ async def delete_campaign(
     db: Session = Depends(get_db),
     curr_u: User = Depends(get_current_valid_user),
 ) -> None:
-    existing_c = campaign.read(id, db)
+    existing_c = get_existing_campaign(id, db)
 
-    if not existing_c:
-        raise CampaignNotFoundErr
-
-    if existing_c.campaigner_id != curr_u.id:
+    if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
 
     campaign.delete(id, db)
@@ -77,10 +93,7 @@ async def delete_campaign(
 
 @router.get("/campaigns/{id}", response_model=CampaignRead)
 async def read_campaign(id: int, db: Session = Depends(get_db)) -> Campaign:
-    existing_c = campaign.read(id, db)
-
-    if not existing_c:
-        raise CampaignNotFoundErr
+    existing_c = get_existing_campaign(id, db)
 
     return existing_c
 

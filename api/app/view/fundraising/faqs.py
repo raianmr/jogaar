@@ -1,6 +1,6 @@
-from app.core.campaigning import CampaignNotFoundErr, MiscConflictErr
-from app.core.security import NotAllowedErr, get_current_valid_user
-from app.data.crud import campaign, faq
+from app.core.campaigning import get_existing_campaign
+from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
+from app.data.crud import faq
 from app.data.crud.faq import FAQ, FAQCreate, FAQRead, FAQUpdate
 from app.data.crud.user import User
 from app.data.session import get_db
@@ -27,6 +27,14 @@ class FAQNotFoundErr(HTTPException):
         )
 
 
+def get_existing_faq(faq_id: int, db: Session) -> FAQ:
+    existing_f = faq.read(faq_id, db)
+    if not existing_f:
+        raise FAQNotFoundErr
+
+    return existing_f
+
+
 @router.post(
     "/campaigns/{c_id}/faqs",
     status_code=status.HTTP_201_CREATED,
@@ -38,12 +46,9 @@ async def create_faq(
     db: Session = Depends(get_db),
     curr_u: User = Depends(get_current_valid_user),
 ) -> FAQ:
-    existing_c = campaign.read(c_id, db)
+    existing_c = get_existing_campaign(c_id, db)
 
-    if not existing_c:
-        raise CampaignNotFoundErr
-
-    if existing_c.campaigner_id != curr_u.id:
+    if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
 
     try:
@@ -62,17 +67,10 @@ async def update_faq(
     db: Session = Depends(get_db),
     curr_u: User = Depends(get_current_valid_user),
 ) -> FAQ | None:
-    existing_f = faq.read(f_id, db)
+    existing_f = get_existing_faq(f_id, db)
+    existing_c = get_existing_campaign(existing_f.campaign_id, db)  # type: ignore
 
-    if not existing_f:
-        raise FAQNotFoundErr
-
-    existing_c = campaign.read(existing_f.campaign_id, db)  # type: ignore
-
-    if not existing_c:
-        raise CampaignNotFoundErr
-
-    if existing_c.campaigner_id != curr_u.id:
+    if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
 
     try:
@@ -94,17 +92,10 @@ async def delete_faq(
     db: Session = Depends(get_db),
     curr_u: User = Depends(get_current_valid_user),
 ):
-    existing_f = faq.read(f_id, db)
+    existing_f = get_existing_faq(f_id, db)
+    existing_c = get_existing_campaign(existing_f.campaign_id, db)  # type: ignore
 
-    if not existing_f:
-        raise FAQNotFoundErr
-
-    existing_c = campaign.read(existing_f.campaign_id, db)  # type: ignore
-
-    if not existing_c:
-        raise CampaignNotFoundErr
-
-    if existing_c.campaigner_id != curr_u.id:
+    if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
 
     faq.delete(f_id, db)
@@ -112,10 +103,7 @@ async def delete_faq(
 
 @router.get("/faqs/{f_id}", response_model=FAQRead)
 async def read_faq(f_id: int, db: Session = Depends(get_db)) -> FAQ:
-    existing_f = faq.read(f_id, db)
-
-    if not existing_f:
-        raise FAQNotFoundErr
+    existing_f = get_existing_faq(f_id, db)
 
     return existing_f
 

@@ -1,6 +1,6 @@
-from app.core.campaigning import CampaignNotFoundErr
-from app.core.security import NotAllowedErr, get_current_valid_user
-from app.data.crud import campaign, reward
+from app.core.campaigning import get_existing_campaign
+from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
+from app.data.crud import reward
 from app.data.crud.reward import Reward, RewardCreate, RewardRead, RewardUpdate
 from app.data.crud.user import User
 from app.data.session import get_db
@@ -27,6 +27,14 @@ class RewardNotFoundErr(HTTPException):
         )
 
 
+def get_existing_reward(reward_id: int, db: Session) -> Reward:
+    existing_r = reward.read(reward_id, db)
+    if not existing_r:
+        raise RewardNotFoundErr
+
+    return existing_r
+
+
 @router.post(
     "/campaigns/{c_id}/rewards",
     status_code=status.HTTP_201_CREATED,
@@ -38,12 +46,9 @@ async def create_reward(
     db: Session = Depends(get_db),
     curr_u: User = Depends(get_current_valid_user),
 ) -> Reward:
-    existing_c = campaign.read(c_id, db)
+    existing_c = get_existing_campaign(c_id, db)
 
-    if not existing_c:
-        raise CampaignNotFoundErr
-
-    if existing_c.campaigner_id != curr_u.id:
+    if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
 
     try:
@@ -62,17 +67,10 @@ async def update_reward(
     db: Session = Depends(get_db),
     curr_u: User = Depends(get_current_valid_user),
 ) -> Reward | None:
-    existing_r = reward.read(r_id, db)
+    existing_r = get_existing_reward(r_id, db)
+    existing_c = get_existing_campaign(existing_r.campaign_id, db)  # type: ignore
 
-    if not existing_r:
-        raise RewardNotFoundErr
-
-    existing_c = campaign.read(existing_r.campaign_id, db)  # type: ignore
-
-    if not existing_c:
-        raise CampaignNotFoundErr
-
-    if existing_c.campaigner_id != curr_u.id:
+    if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
 
     try:
@@ -94,17 +92,10 @@ async def delete_reward(
     db: Session = Depends(get_db),
     curr_u: User = Depends(get_current_valid_user),
 ) -> None:
-    existing_r = reward.read(r_id, db)
+    existing_r = get_existing_reward(r_id, db)
+    existing_c = get_existing_campaign(existing_r.campaign_id, db)  # type: ignore
 
-    if not existing_r:
-        raise RewardNotFoundErr
-
-    existing_c = campaign.read(existing_r.campaign_id, db)  # type: ignore
-
-    if not existing_c:
-        raise CampaignNotFoundErr
-
-    if existing_c.campaigner_id != curr_u.id:
+    if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
 
     reward.delete(r_id, db)
@@ -112,10 +103,7 @@ async def delete_reward(
 
 @router.get("/rewards/{r_id}", response_model=RewardRead)
 async def read_reward(r_id: int, db: Session = Depends(get_db)) -> Reward:
-    existing_r = reward.read(r_id, db)
-
-    if not existing_r:
-        raise RewardNotFoundErr
+    existing_r = get_existing_reward(r_id, db)
 
     return existing_r
 

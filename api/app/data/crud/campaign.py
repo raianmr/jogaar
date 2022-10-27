@@ -99,7 +99,14 @@ def update(id: int, c: CampaignUpdate, db: Session) -> None:
     db.commit()
 
 
+def update_state(id: int, s: State, db: Session):
+    db.query(Campaign).filter(Campaign.id == id).update({Campaign.current_state: s})
+
+    db.commit()
+
+
 def delete(id: int, db: Session) -> None:
     db.query(Campaign).filter(Campaign.id == id).delete()
 
     db.commit()
+

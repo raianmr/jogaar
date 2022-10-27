@@ -23,21 +23,9 @@ class CampaignNotFoundErr(HTTPException):
         )
 
 
-def get_existing_campaign(
-    campaign_id: int = Path(), db: Session = Depends(get_db)
-) -> Campaign:
+def get_existing_campaign(campaign_id: int, db: Session) -> Campaign:
     existing_c = campaign.read(campaign_id, db)
     if not existing_c:
         raise CampaignNotFoundErr
-
-    return existing_c
-
-
-def get_campaign_with_access(
-    existing_c: Campaign = Depends(get_existing_campaign),
-    curr_u: User = Depends(get_current_valid_user),
-) -> Campaign:
-    if existing_c.campaigner_id != curr_u.id and not is_super(curr_u.access_level):
-        raise NotAllowedErr
 
     return existing_c
