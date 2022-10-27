@@ -1,5 +1,5 @@
 from app.core.campaigning import CampaignNotFoundErr
-from app.core.security import NotAllowedErr, get_current_user
+from app.core.security import NotAllowedErr, get_current_valid_user
 from app.data.crud import campaign, reward
 from app.data.crud.reward import Reward, RewardCreate, RewardRead, RewardUpdate
 from app.data.crud.user import User
@@ -36,7 +36,7 @@ async def create_reward(
     c_id: int,
     r: RewardCreate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> Reward:
     existing_c = campaign.read(c_id, db)
 
@@ -60,7 +60,7 @@ async def update_reward(
     r_id: int,
     r: RewardUpdate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> Reward | None:
     existing_r = reward.read(r_id, db)
 
@@ -92,7 +92,7 @@ async def update_reward(
 async def delete_reward(
     r_id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> None:
     existing_r = reward.read(r_id, db)
 

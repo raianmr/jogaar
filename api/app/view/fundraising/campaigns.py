@@ -1,5 +1,5 @@
 from app.core.campaigning import CampaignNotFoundErr, MiscConflictErr
-from app.core.security import NotAllowedErr, get_current_user
+from app.core.security import NotAllowedErr, get_current_valid_user
 from app.data.crud import campaign
 from app.data.crud.campaign import (
     Campaign,
@@ -22,7 +22,7 @@ router = APIRouter()
 async def create_campaign(
     c: CampaignCreate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> Campaign:
     try:
         new_c = campaign.create(curr_u.id, c, db)  # type: ignore
@@ -38,7 +38,7 @@ async def update_campaign(
     id: int,
     c: CampaignUpdate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> Campaign | None:
     existing_c = campaign.read(id, db)
 
@@ -62,7 +62,7 @@ async def update_campaign(
 async def delete_campaign(
     id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> None:
     existing_c = campaign.read(id, db)
 

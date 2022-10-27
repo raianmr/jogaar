@@ -1,0 +1,5 @@
+refactor:
+  skip:
+    - assign-if-exp
+    - de-morgan
+

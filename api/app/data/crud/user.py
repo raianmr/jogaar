@@ -1,7 +1,16 @@
+from enum import Enum
+
 from app.data.base import Base, BaseRead
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import Boolean, Column, String, text
 from sqlalchemy.orm import Session
+
+
+class Access(str, Enum):
+    BANNED = "banned"
+    NORMAL = "normal"
+    MOD = "mod"
+    ADMIN = "admin"
 
 
 class User(Base):
@@ -13,8 +22,7 @@ class User(Base):
     contact = Column(String)
     address = Column(String)
 
-    moderator = Column(Boolean, server_default=text("False"), nullable=False)
-    banned = Column(Boolean, server_default=text("False"), nullable=False)
+    access_level = Column(String, server_default=Access.NORMAL, nullable=False)
 
 
 class UserCreate(BaseModel):
@@ -29,8 +37,7 @@ class UserRead(BaseRead):
     about: str | None
     contact: str | None
     address: str | None
-    moderator: bool
-    banned: bool
+    access_level: Access
 
 
 class UserUpdate(BaseModel):

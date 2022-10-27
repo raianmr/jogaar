@@ -1,6 +1,5 @@
 from app.core.security import (
     AuthenticatingErr,
-    BannedUserErr,
     Token,
     create_access_token,
     verify_password,
@@ -25,9 +24,6 @@ async def login_user(
 
     if not verify_password(creds.password, existing_u.password):  # type: ignore
         raise AuthenticatingErr
-
-    if existing_u.banned:
-        raise BannedUserErr
 
     access_token = create_access_token(data={"user_id": existing_u.id})
 

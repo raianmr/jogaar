@@ -1,4 +1,10 @@
-from app.core.security import NotAllowedErr, get_current_user, hash_password
+from app.core.security import (
+    NotAllowedErr,
+    get_current_valid_user,
+    get_existing_user,
+    has_access_over,
+    hash_password,
+)
 from app.data.crud import user
 from app.data.crud.user import User, UserCreate, UserRead, UserUpdate
 from app.data.session import get_db
@@ -14,14 +20,6 @@ class EmailConflictErr(HTTPException):
         super().__init__(
             status_code=status.HTTP_409_CONFLICT,
             detail="user with given email already exists",
-        )
-
-
-class UserNotFoundErr(HTTPException):
-    def __init__(self) -> None:
-        super().__init__(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="user was not found",
         )
 
 
@@ -42,14 +40,11 @@ async def update_user(
     id: int,
     u: UserUpdate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> User | None:
-    existing_u = user.read(id, db)
+    existing_u = get_existing_user(id, db)
 
-    if not existing_u:
-        raise UserNotFoundErr
-
-    if existing_u.id != curr_u.id:
+    if not has_access_over(existing_u, curr_u):
         raise NotAllowedErr
 
     try:
@@ -70,14 +65,11 @@ async def update_user(
 async def delete_user(
     id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> None:
-    existing_u = user.read(id, db)
+    existing_u = get_existing_user(id, db)
 
-    if not existing_u:
-        raise UserNotFoundErr
-
-    if existing_u.id != curr_u.id:
+    if not has_access_over(existing_u, curr_u):
         raise NotAllowedErr
 
     user.delete(id, db)
@@ -85,10 +77,7 @@ async def delete_user(
 
 @router.get("/users/{id}", response_model=UserRead)
 async def read_user(id: int, db: Session = Depends(get_db)) -> User:
-    existing_u = user.read(id, db)
-
-    if not existing_u:
-        raise UserNotFoundErr
+    existing_u = get_existing_user(id, db)
 
     return existing_u
 

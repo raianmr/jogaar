@@ -1,5 +1,5 @@
 from app.core.campaigning import CampaignNotFoundErr, MiscConflictErr
-from app.core.security import NotAllowedErr, get_current_user
+from app.core.security import NotAllowedErr, get_current_valid_user
 from app.data.crud import campaign, faq
 from app.data.crud.faq import FAQ, FAQCreate, FAQRead, FAQUpdate
 from app.data.crud.user import User
@@ -36,7 +36,7 @@ async def create_faq(
     c_id: int,
     f: FAQCreate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> FAQ:
     existing_c = campaign.read(c_id, db)
 
@@ -60,7 +60,7 @@ async def update_faq(
     f_id: int,
     f: FAQUpdate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> FAQ | None:
     existing_f = faq.read(f_id, db)
 
@@ -92,7 +92,7 @@ async def update_faq(
 async def delete_faq(
     f_id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ):
     existing_f = faq.read(f_id, db)
 

@@ -1,9 +1,18 @@
 from datetime import datetime
+from enum import Enum
 
 from app.data.base import Base, BaseRead
 from pydantic import BaseModel
 from sqlalchemy import TIMESTAMP, Column, ForeignKey, Integer, String, text
 from sqlalchemy.orm import Session
+
+
+class State(str, Enum):
+    DRAFT = "draft"
+    STARTED = "started"
+    ENDED = "ended"
+    LOCKED = "locked"
+    GREENLIT = "greenlit"
 
 
 class Campaign(Base):
@@ -23,6 +32,8 @@ class Campaign(Base):
         server_default=text("NOW() + INTERVAL '1 month'"),
         nullable=False,
     )
+
+    current_state = Column(String, server_default=State.DRAFT, nullable=False)
 
 
 class CampaignCreate(BaseModel):
@@ -44,6 +55,8 @@ class CampaignRead(BaseRead):
     goal: int
     pledged: int
     deadline: datetime
+
+    current_state: State
 
 
 class CampaignUpdate(BaseModel):

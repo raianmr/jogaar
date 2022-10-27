@@ -1,5 +1,5 @@
 from app.core.campaigning import CampaignNotFoundErr
-from app.core.security import NotAllowedErr, get_current_user
+from app.core.security import NotAllowedErr, get_current_valid_user
 from app.data.crud import campaign, tag
 from app.data.crud.tag import Tag, TagCreate, TagRead, TagUpdate
 from app.data.crud.user import User
@@ -36,7 +36,7 @@ async def create_tag(
     c_id: int,
     t: TagCreate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> Tag:
     existing_c = campaign.read(c_id, db)
 
@@ -60,7 +60,7 @@ async def update_tag(
     t_id: int,
     t: TagUpdate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> Tag | None:
     existing_t = tag.read(t_id, db)
 
@@ -92,7 +92,7 @@ async def update_tag(
 async def delete_tag(
     t_id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> None:
     existing_t = tag.read(t_id, db)
 

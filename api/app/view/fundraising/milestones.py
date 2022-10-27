@@ -1,5 +1,5 @@
 from app.core.campaigning import CampaignNotFoundErr
-from app.core.security import NotAllowedErr, get_current_user
+from app.core.security import NotAllowedErr, get_current_valid_user
 from app.data.crud import campaign, milestone
 from app.data.crud.milestone import (
     Milestone,
@@ -41,7 +41,7 @@ async def create_milestone(
     c_id: int,
     m: MilestoneCreate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> Milestone:
     existing_c = campaign.read(c_id, db)
 
@@ -65,7 +65,7 @@ async def update_milestone(
     m_id: int,
     m: MilestoneUpdate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> Milestone | None:
     existing_m = milestone.read(m_id, db)
 
@@ -97,7 +97,7 @@ async def update_milestone(
 async def delete_milestone(
     m_id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_user),
+    curr_u: User = Depends(get_current_valid_user),
 ) -> None:
     existing_m = milestone.read(m_id, db)
 
