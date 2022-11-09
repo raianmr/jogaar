@@ -1,9 +1,14 @@
-import Link from "next/link"
+import { useRouter } from "next/router"
+import { useEffect, useState } from "react"
 
 export default function Home() {
-  return (
-    <div>
-      <Link href="/login">index</Link>
-    </div>
-  )
+  const router = useRouter()
+
+  const [loggedIn, setloggedIn] = useState(false)
+
+  useEffect(() => {
+    if (!loggedIn) router.push("/login")
+  })
+
+  return <></>
 }
