@@ -75,6 +75,14 @@ async def delete_user(
     user.delete(id, db)
 
 
+@router.get("/users/current", response_model=UserRead)
+async def read_current_user(
+    curr_u: User = Depends(get_current_valid_user),
+) -> User:
+
+    return curr_u
+
+
 @router.get("/users/{id}", response_model=UserRead)
 async def read_user(id: int, db: Session = Depends(get_db)) -> User:
     existing_u = get_existing_user(id, db)
