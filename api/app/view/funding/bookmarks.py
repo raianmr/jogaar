@@ -30,7 +30,7 @@ class BookmarkNotFoundErr(HTTPException):
 
 
 def get_existing_bookmark(u_id: int, c_id: int, db: Session) -> Bookmark:
-    existing_b = bookmark.real_by_user_and_campaign(u_id, c_id, db)
+    existing_b = bookmark.read_by_user_and_campaign(u_id, c_id, db)
     if not existing_b:
         raise BookmarkNotFoundErr
 
@@ -46,11 +46,11 @@ async def create_bookmark(
     c_id: int,
     db: Session = Depends(get_db),
     curr_u: User = Depends(get_current_valid_user),
-):
-    _ = get_existing_campaign(c_id, db)
+) -> Bookmark:
+    existing_c = get_existing_campaign(c_id, db)
 
     try:
-        new_b = bookmark.create(curr_u.id, c_id, db)
+        new_b = bookmark.create(curr_u.id, existing_c.id, db)
 
     except IntegrityError:
         raise UserAndCampaignConflictErr
@@ -67,10 +67,10 @@ async def delete_bookmark(
     db: Session = Depends(get_db),
     curr_u: User = Depends(get_current_valid_user),
 ) -> None:
-    _ = get_existing_bookmark(curr_u.id, c_id, db)  # type: ignore
-    _ = get_existing_campaign(c_id, db)
+    existing_b = get_existing_bookmark(curr_u.id, c_id, db)  # type: ignore
+    existing_c = get_existing_campaign(existing_b.campaign_id, db)
 
-    bookmark.delete_by_user_and_campaign(curr_u.id, c_id, db)
+    bookmark.delete_by_user_and_campaign(curr_u.id, existing_c.id, db)
 
 
 @router.get("/campaigns/{c_id}/bookmarks")

@@ -65,8 +65,8 @@ def read_all(limit: int, offset: int, db: Session) -> list[Reward]:
     return db.query(Reward).limit(limit).offset(offset).all()
 
 
-def update(id: int | Column, u: RewardUpdate, db: Session) -> None:
-    db.query(Reward).filter(Reward.id == id).update(u.dict(exclude_unset=True))
+def update(id: int | Column, r: RewardUpdate, db: Session) -> None:
+    db.query(Reward).filter(Reward.id == id).update(r.dict(exclude_unset=True))
 
     db.commit()
 

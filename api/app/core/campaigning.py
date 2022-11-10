@@ -36,7 +36,7 @@ def get_existing_campaign(campaign_id: int | Column, db: Session) -> Campaign:
 
 
 def campaign_with_meta(existing_c: Campaign, existing_u: User, db: Session):
-    existing_b = bookmark.real_by_user_and_campaign(existing_u.id, existing_c.id, db)
+    existing_b = bookmark.read_by_user_and_campaign(existing_u.id, existing_c.id, db)
 
     return {
         **jsonable_encoder(existing_c),

@@ -52,8 +52,8 @@ def read_all(limit: int, offset: int, db: Session) -> list[Tag]:
     return db.query(Tag).limit(limit).offset(offset).all()
 
 
-def update(id: int | Column, u: TagUpdate, db: Session) -> None:
-    db.query(Tag).filter(Tag.id == id).update(u.dict(exclude_unset=True))
+def update(id: int | Column, t: TagUpdate, db: Session) -> None:
+    db.query(Tag).filter(Tag.id == id).update(t.dict(exclude_unset=True))
 
     db.commit()
 

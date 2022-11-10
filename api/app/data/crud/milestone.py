@@ -79,8 +79,8 @@ def read_all(limit: int, offset: int, db: Session) -> list[Milestone]:
     return db.query(Milestone).limit(limit).offset(offset).all()
 
 
-def update(id: int | Column, u: MilestoneUpdate, db: Session) -> None:
-    db.query(Milestone).filter(Milestone.id == id).update(u.dict(exclude_unset=True))
+def update(id: int | Column, m: MilestoneUpdate, db: Session) -> None:
+    db.query(Milestone).filter(Milestone.id == id).update(m.dict(exclude_unset=True))
 
     db.commit()
 

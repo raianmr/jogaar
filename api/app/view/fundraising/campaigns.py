@@ -1,6 +1,6 @@
 from app.core.campaigning import MiscConflictErr, get_existing_campaign
 from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
-from app.data.crud import campaign
+from app.data.crud import bookmark, campaign
 from app.data.crud.campaign import (
     Campaign,
     CampaignCreate,
@@ -27,6 +27,7 @@ async def create_campaign(
 ) -> Campaign:
     try:
         new_c = campaign.create(curr_u.id, c, db)
+        _ = bookmark.create(curr_u.id, new_c.id, db)
 
     except IntegrityError:
         raise MiscConflictErr

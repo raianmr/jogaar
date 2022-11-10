@@ -34,7 +34,7 @@ def read(id: int | Column, db: Session) -> Bookmark | None:
     return db.query(Bookmark).filter(Bookmark.id == id).first()
 
 
-def real_by_user_and_campaign(
+def read_by_user_and_campaign(
     u_id: int | Column, c_id: int | Column, db: Session
 ) -> Bookmark | None:
     return (
