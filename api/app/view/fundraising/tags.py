@@ -68,7 +68,7 @@ async def update_tag(
     curr_u: User = Depends(get_current_valid_user),
 ) -> Tag | None:
     existing_t = get_existing_tag(t_id, db)
-    existing_c = get_existing_campaign(existing_t.campaign_id, db)  
+    existing_c = get_existing_campaign(existing_t.campaign_id, db)
 
     if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
@@ -93,7 +93,7 @@ async def delete_tag(
     curr_u: User = Depends(get_current_valid_user),
 ) -> None:
     existing_t = get_existing_tag(t_id, db)
-    existing_c = get_existing_campaign(existing_t.campaign_id, db) 
+    existing_c = get_existing_campaign(existing_t.campaign_id, db)
 
     if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
@@ -102,7 +102,7 @@ async def delete_tag(
 
 
 @router.get("/tags/{t_id}", response_model=TagRead)
-async def read_tag(t_id: int, db: Session = Depends(get_db)):
+async def read_tag(t_id: int, db: Session = Depends(get_db)) -> Tag:
     existing_t = get_existing_tag(t_id, db)
 
     return existing_t
@@ -110,8 +110,11 @@ async def read_tag(t_id: int, db: Session = Depends(get_db)):
 
 @router.get("/campaigns/{c_id}/tags")
 async def read_tags_by_campaign(
-    c_id: int, limit: int = 100, offset: int = 0, db: Session = Depends(get_db)
-):
+    c_id: int,
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+) -> list[Tag]:
     all_t_by_c = tag.read_all_by_campaign(c_id, limit, offset, db)
 
     return all_t_by_c

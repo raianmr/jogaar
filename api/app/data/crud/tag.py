@@ -40,7 +40,9 @@ def read(id: int | Column, db: Session) -> Tag | None:
     return db.query(Tag).filter(Tag.id == id).first()
 
 
-def read_all_by_campaign(c_id: int | Column, limit: int, offset: int, db: Session) -> list[Tag]:
+def read_all_by_campaign(
+    c_id: int | Column, limit: int, offset: int, db: Session
+) -> list[Tag]:
     return (
         db.query(Tag).filter(Tag.campaign_id == c_id).limit(limit).offset(offset).all()
     )

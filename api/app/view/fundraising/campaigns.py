@@ -10,7 +10,7 @@ from app.data.crud.campaign import (
 )
 from app.data.crud.user import User
 from app.data.session import get_db
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Body, Depends, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -26,7 +26,7 @@ async def create_campaign(
     curr_u: User = Depends(get_current_valid_user),
 ) -> Campaign:
     try:
-        new_c = campaign.create(curr_u.id, c, db) 
+        new_c = campaign.create(curr_u.id, c, db)
 
     except IntegrityError:
         raise MiscConflictErr
@@ -107,10 +107,34 @@ async def read_campaigns(
     return all_c
 
 
+@router.get("/users/{u_id}/bookmarked", response_model=list[CampaignRead])
+async def read_bookmarked_campaigns(
+    u_id: int,
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+) -> list[Campaign]:
+    all_c = campaign.read_all_bookmarked(u_id, limit, offset, db)
+
+    return all_c
+
+
+@router.get("/users/{u_id}/pledged", response_model=list[CampaignRead])
+async def read_pledged_campaigns(
+    u_id: int,
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+) -> list[Campaign]:
+    all_c = campaign.read_all_pledged(u_id, limit, offset, db)
+
+    return all_c
+
+
 @router.get("/users/{u_id}/campaigns", response_model=list[CampaignRead])
 async def read_campaigns_by_user(
     u_id: int, limit: int = 100, offset: int = 0, db: Session = Depends(get_db)
 ) -> list[Campaign]:
-    all_c_by_u = campaign.read_all_by_user(u_id, limit, offset, db)
+    all_c_by_u = campaign.read_all_by_campaigner(u_id, limit, offset, db)
 
     return all_c_by_u

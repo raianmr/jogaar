@@ -2,6 +2,8 @@ from datetime import datetime
 from enum import Enum
 
 from app.data.base import Base, BaseRead
+from app.data.crud.bookmark import Bookmark
+from app.data.crud.pledge import Pledge
 from pydantic import BaseModel
 from sqlalchemy import TIMESTAMP, Column, ForeignKey, Integer, String, text
 from sqlalchemy.orm import Session
@@ -59,6 +61,10 @@ class CampaignRead(BaseRead):
     current_state: State
 
 
+class CampaignReadMeta(CampaignRead):
+    bookmarked: bool
+
+
 class CampaignUpdate(BaseModel):
     title: str | None
     description: str | None
@@ -79,10 +85,38 @@ def read(id: int | Column, db: Session) -> Campaign | None:
     return db.query(Campaign).filter(Campaign.id == id).first()
 
 
-def read_all_by_user(u_id: int | Column, limit: int, offset: int, db: Session) -> list[Campaign]:
+def read_all_by_campaigner(
+    u_id: int | Column, limit: int, offset: int, db: Session
+) -> list[Campaign]:
     return (
         db.query(Campaign)
         .filter(Campaign.campaigner_id == u_id)
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
+
+
+def read_all_bookmarked(
+    u_id: int | Column, limit: int, offset: int, db: Session
+) -> list[Campaign]:
+    return (
+        db.query(Campaign)
+        .join(Bookmark, Bookmark.campaign_id == Campaign.id)
+        .filter(Bookmark.user_id == u_id)
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
+
+
+def read_all_pledged(
+    u_id: int | Column, limit: int, offset: int, db: Session
+) -> list[Campaign]:
+    return (
+        db.query(Campaign)
+        .join(Pledge, Pledge.campaign_id == Campaign.id)
+        .filter(Pledge.pledger_id == u_id)
         .limit(limit)
         .offset(offset)
         .all()
@@ -109,4 +143,3 @@ def delete(id: int | Column, db: Session) -> None:
     db.query(Campaign).filter(Campaign.id == id).delete()
 
     db.commit()
-
