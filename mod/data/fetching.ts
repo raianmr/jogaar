@@ -1,5 +1,5 @@
+import { User } from "./models"
 import { getToken, TokenData } from "./store"
-import { User } from "./user"
 
 export class FetchError extends Error {
   resp: Response

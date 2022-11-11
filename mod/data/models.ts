@@ -1,4 +1,7 @@
-import { Base } from "./base"
+export interface Base {
+  id: number
+  created_at: Date
+}
 
 export enum State {
   DRAFT = "draft",
@@ -20,4 +23,21 @@ export interface Campaign extends Base {
   deadline: Date
 
   current_state: State
+}
+
+export enum Access {
+  BANNED = "banned",
+  NORMAL = "normal",
+  MOD = "mod",
+  ADMIN = "admin",
+}
+
+export interface User extends Base {
+  name: string
+  email: string
+  about: string
+  contact: string
+  address: string
+
+  access_level: Access
 }
