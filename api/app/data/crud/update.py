@@ -32,14 +32,14 @@ class UpdateUpdate(BaseModel):
     content: str | None
 
 
-def create(c_id: int | Column, u: UpdateCreate, db: Session) -> Update:
-    new_u = Update(campaign_id=c_id, **u.dict())  # type: ignore
-    db.add(new_u)
+def create(c_id: int | Column, up: UpdateCreate, db: Session) -> Update:
+    new_up = Update(campaign_id=c_id, **up.dict())  # type: ignore
+    db.add(new_up)
 
     db.commit()
-    db.refresh(new_u)
+    db.refresh(new_up)
 
-    return new_u
+    return new_up
 
 
 def read(id: int | Column, db: Session) -> Update | None:
@@ -62,9 +62,9 @@ def read_all(limit: int, offset: int, db: Session) -> list[Update]:
     return db.query(Update).limit(limit).offset(offset).all()
 
 
-def update(id: int | Column, u: UpdateUpdate, db: Session) -> None:
+def update(id: int | Column, up: UpdateUpdate, db: Session) -> None:
     db.query(Update).filter(Update.id == id).update(
-        {"edited": True, **u.dict(exclude_unset=True)}
+        {"edited": True, **up.dict(exclude_unset=True)}
     )
 
     db.commit()

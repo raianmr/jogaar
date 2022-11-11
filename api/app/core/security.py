@@ -5,6 +5,7 @@ from typing import Callable
 from app.core.config import env
 from app.data.crud import user
 from app.data.crud.campaign import Campaign, State
+from app.data.crud.reply import Reply
 from app.data.crud.user import Access, User
 from app.data.session import get_db
 from fastapi import Depends, HTTPException, status
@@ -146,6 +147,17 @@ def _(c: Campaign, curr_u: User) -> bool:
         return True
 
     if c.campaigner_id == curr_u.id and c.current_state != State.LOCKED:
+        return True
+
+    return False
+
+
+@has_access_over.register
+def _(r: Reply, curr_u: User) -> bool:
+    if is_super(curr_u):
+        return True
+
+    if r.user_id == curr_u.id:
         return True
 
     return False

@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta, timezone
 
 from app.core.security import Access, NotAllowedErr, get_current_valid_user, is_super
-from app.data.crud import bookmark, campaign
+from app.data.crud import bookmark, campaign, reply, update
 from app.data.crud.campaign import Campaign
+from app.data.crud.reply import Reply
+from app.data.crud.update import Update
 from app.data.crud.user import User
 from app.data.session import get_db
 from fastapi import Depends, HTTPException, Path, status
@@ -15,7 +17,7 @@ class MiscConflictErr(HTTPException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_409_CONFLICT,
-            detail="campaign already exists",
+            detail="entity already exists",
         )
 
 
@@ -24,6 +26,22 @@ class CampaignNotFoundErr(HTTPException):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="campaign was not found",
+        )
+
+
+class UpdateNotFoundErr(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="update was not found",
+        )
+
+
+class ReplyNotFoundErr(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="reply was not found",
         )
 
 
@@ -42,6 +60,22 @@ def campaign_with_meta(existing_c: Campaign, existing_u: User, db: Session):
         **jsonable_encoder(existing_c),
         "bookmarked": bool(existing_b),
     }
+
+
+def get_existing_update(update_id: int, db: Session) -> Update:
+    existing_u = update.read(update_id, db)
+    if not existing_u:
+        raise UpdateNotFoundErr
+
+    return existing_u
+
+
+def get_existing_reply(update_id: int, db: Session) -> Reply:
+    existing_r = reply.read(update_id, db)
+    if not existing_r:
+        raise ReplyNotFoundErr
+
+    return existing_r
 
 
 def has_crossed_deadline(c: Campaign) -> bool:

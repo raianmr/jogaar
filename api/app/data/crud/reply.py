@@ -34,8 +34,10 @@ class ReplyUpdate(BaseModel):
     content: str
 
 
-def create(_user_id: int | Column, _update_id: int | Column, r: ReplyCreate, db: Session) -> Reply:
-    new_r = Reply(user_id=_user_id, update_id=_update_id, **r.dict())  # type: ignore
+def create(
+    u_id: int | Column, up_id: int | Column, r: ReplyCreate, db: Session
+) -> Reply:
+    new_r = Reply(user_id=u_id, update_id=up_id, **r.dict())  # type: ignore
     db.add(new_r)
 
     db.commit()
@@ -48,10 +50,12 @@ def read(id: int | Column, db: Session) -> Reply | None:
     return db.query(Reply).filter(Reply.id == id).first()
 
 
-def read_all_by_update(u_id: int | Column, limit: int, offset: int, db: Session) -> list[Reply]:
+def read_all_by_update(
+    up_id: int | Column, limit: int, offset: int, db: Session
+) -> list[Reply]:
     return (
         db.query(Reply)
-        .filter(Reply.update_id == u_id)
+        .filter(Reply.update_id == up_id)
         .limit(limit)
         .offset(offset)
         .all()

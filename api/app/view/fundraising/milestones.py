@@ -73,7 +73,7 @@ async def update_milestone(
     curr_u: User = Depends(get_current_valid_user),
 ) -> Milestone | None:
     existing_m = get_existing_milestone(m_id, db)
-    existing_c = get_existing_campaign(existing_m.campaign_id, db) 
+    existing_c = get_existing_campaign(existing_m.campaign_id, db)
 
     if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
@@ -98,7 +98,7 @@ async def delete_milestone(
     curr_u: User = Depends(get_current_valid_user),
 ) -> None:
     existing_m = get_existing_milestone(m_id, db)
-    existing_c = get_existing_campaign(existing_m.campaign_id, db) 
+    existing_c = get_existing_campaign(existing_m.campaign_id, db)
 
     if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
@@ -115,7 +115,10 @@ async def read_milestone(m_id: int, db: Session = Depends(get_db)) -> Milestone:
 
 @router.get("/campaigns/{c_id}/milestones", response_model=list[MilestoneRead])
 async def read_milestones_by_campaign(
-    c_id: int, limit: int = 100, offset: int = 0, db: Session = Depends(get_db)
+    c_id: int,
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db),
 ) -> list[Milestone]:
     all_m_by_c = milestone.read_all_by_campaign(c_id, limit, offset, db)
 
