@@ -6,6 +6,7 @@ from .faq import FAQ
 from .milestone import Milestone
 from .pledge import Pledge
 from .reply import Reply
+from .report import Report
 from .reward import Reward
 from .tag import Tag
 from .update import Update

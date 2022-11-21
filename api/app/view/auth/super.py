@@ -4,28 +4,29 @@ from app.core.campaigning import (
     has_crossed_deadline,
 )
 from app.core.security import (
-    NotAllowedErr,
     get_current_admin_user,
     get_current_super_user,
+    get_current_valid_user,
     get_existing_user,
-    has_access_over,
-    hash_password,
 )
-from app.data.crud import campaign, user
-from app.data.crud.campaign import (
-    Campaign,
-    CampaignCreate,
-    CampaignRead,
-    CampaignUpdate,
-    State,
-)
-from app.data.crud.user import Access, User, UserCreate, UserRead, UserUpdate
+from app.data.crud import campaign, report, user
+from app.data.crud.campaign import Campaign, CampaignRead, State
+from app.data.crud.report import ContentType, Report, ReportCreate, ReportRead
+from app.data.crud.user import Access, User, UserRead
 from app.data.session import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 router = APIRouter()
+
+
+class ReportNotFoundErr(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="report was not found",
+        )
 
 
 def change_user_access(status: bool, u: User, target: Access, db: Session) -> None:
@@ -112,3 +113,43 @@ async def lock_campaign(
     updated_c = campaign.read(id, db)
 
     return updated_c
+
+
+@router.post("/reports", status_code=status.HTTP_201_CREATED, response_model=ReportRead)
+async def create_report(
+    r: ReportCreate,
+    db: Session = Depends(get_db),
+    curr_u: User = Depends(get_current_valid_user),
+) -> Report:
+    try:
+        new_report = report.create(curr_u.id, r, db)
+
+    except IntegrityError:
+        raise MiscConflictErr
+
+    return new_report
+
+
+@router.get("/reports/{id}", response_model=ReportRead)
+async def read_report(
+    id: int,
+    db: Session = Depends(get_db),
+    curr_u: User = Depends(get_current_super_user),
+) -> Report:
+    existing_report = report.read(id, db)
+    if not existing_report:
+        raise ReportNotFoundErr
+
+    return existing_report
+
+
+@router.get("/reports", response_model=list[ReportRead])
+async def read_reports(
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+    curr_u: User = Depends(get_current_super_user),
+) -> list[Report]:
+    all_reports = report.read_all(limit, offset, db)
+
+    return all_reports
