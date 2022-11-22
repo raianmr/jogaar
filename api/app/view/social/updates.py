@@ -1,14 +1,15 @@
+from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
 from app.core.utils import (
     MiscConflictErr,
     get_existing_campaign,
+    get_existing_image,
     get_existing_update,
 )
-from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
 from app.data.crud import update
 from app.data.crud.update import Update, UpdateCreate, UpdateRead, UpdateUpdate
 from app.data.crud.user import User
 from app.data.session import get_db
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -54,6 +55,9 @@ async def update_update(
         raise NotAllowedErr
 
     try:
+        if u.picture_id:
+            _ = get_existing_image(u.picture_id, db)
+
         update.update(existing_up.id, u, db)
         updated_up = update.read(existing_up.id, db)
 

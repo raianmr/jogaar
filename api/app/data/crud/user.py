@@ -21,7 +21,7 @@ class User(Base):
     about = Column(String)
     contact = Column(String)
     address = Column(String)
-    portrait = Column(Integer, ForeignKey("images.id", ondelete="CASCADE"))
+    portrait_id = Column(Integer, ForeignKey("images.id", ondelete="CASCADE"))
 
     access_level = Column(String, server_default=Access.NORMAL, nullable=False)
 
@@ -39,7 +39,7 @@ class UserRead(BaseRead):
     about: str | None
     contact: str | None
     address: str | None
-    portrait: int | None
+    portrait_id: int | None
 
     access_level: Access
 
@@ -48,11 +48,11 @@ class UserUpdate(BaseModel):
     name: str | None
     email: EmailStr | None
     password: str | None
-    
+
     about: str | None
     contact: str | None
     address: str | None
-    portrait: int | None
+    portrait_id: int | None
 
 
 def create(u: UserCreate, db: Session) -> User:

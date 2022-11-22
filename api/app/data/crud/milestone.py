@@ -21,6 +21,7 @@ class Milestone(Base):
 
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
+    picture_id = Column(Integer, ForeignKey("images.id", ondelete="CASCADE"))
 
     deadline = Column(
         TIMESTAMP(timezone=True),
@@ -40,12 +41,14 @@ class MilestoneCreate(BaseModel):
 class MilestoneRead(BaseRead):
     title: str
     description: str
+    picture_id: int | None
     deadline: datetime
 
 
 class MilestoneUpdate(BaseModel):
     title: str | None
     description: str | None
+    picture_id: int | None
     deadline: datetime | None
 
 

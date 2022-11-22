@@ -11,6 +11,8 @@ class Update(Base):
 
     title = Column(String, nullable=False)
     content = Column(String, nullable=False)
+    picture_id = Column(Integer, ForeignKey("images.id", ondelete="CASCADE"))
+
     edited = Column(Boolean, server_default=text("False"), nullable=False)
 
 
@@ -24,12 +26,15 @@ class UpdateRead(BaseRead):
 
     title: str
     content: str
+    picture_id: int | None
+
     edited: bool
 
 
 class UpdateUpdate(BaseModel):
     title: str | None
     content: str | None
+    picture_id: int | None
 
 
 def create(c_id: int | Column, up: UpdateCreate, db: Session) -> Update:
@@ -64,7 +69,7 @@ def read_all(limit: int, offset: int, db: Session) -> list[Update]:
 
 def update(id: int | Column, up: UpdateUpdate, db: Session) -> None:
     db.query(Update).filter(Update.id == id).update(
-        {"edited": True, **up.dict(exclude_unset=True)}
+        {Update.edited: True, **up.dict(exclude_unset=True)}
     )
 
     db.commit()

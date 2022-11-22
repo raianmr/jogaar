@@ -86,8 +86,12 @@ def get_existing_reply(update_id: int, db: Session) -> Reply:
     return existing_r
 
 
-def get_existing_image(image_id: int, db: Session) -> image.Image:
-    existing_img = image.read(image_id, db)
+def get_existing_image(img_id: int, db: Session) -> image.Image:
+    # TODO find a better way to handle this
+    if img_id == 0:
+        raise ImageNotFoundErr
+
+    existing_img = image.read(img_id, db)
     if not existing_img:
         raise ImageNotFoundErr
 

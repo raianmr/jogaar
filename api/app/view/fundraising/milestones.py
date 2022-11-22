@@ -1,5 +1,5 @@
-from app.core.utils import get_existing_campaign
 from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
+from app.core.utils import get_existing_campaign, get_existing_image
 from app.data.crud import milestone
 from app.data.crud.milestone import (
     Milestone,
@@ -79,6 +79,9 @@ async def update_milestone(
         raise NotAllowedErr
 
     try:
+        if m.picture_id:
+            _ = get_existing_image(m.picture_id, db)
+
         milestone.update(m_id, m, db)
         updated_m = milestone.read(m_id, db)
 

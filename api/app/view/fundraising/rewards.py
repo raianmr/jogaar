@@ -1,5 +1,5 @@
-from app.core.utils import get_existing_campaign
 from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
+from app.core.utils import get_existing_campaign, get_existing_image
 from app.data.crud import reward
 from app.data.crud.reward import Reward, RewardCreate, RewardRead, RewardUpdate
 from app.data.crud.user import User
@@ -68,12 +68,15 @@ async def update_reward(
     curr_u: User = Depends(get_current_valid_user),
 ) -> Reward | None:
     existing_r = get_existing_reward(r_id, db)
-    existing_c = get_existing_campaign(existing_r.campaign_id, db) 
+    existing_c = get_existing_campaign(existing_r.campaign_id, db)
 
     if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr
 
     try:
+        if r.picture_id:
+            _ = get_existing_image(r.picture_id, db)
+
         reward.update(r_id, r, db)
         updated_r = reward.read(r_id, db)
 
@@ -93,7 +96,7 @@ async def delete_reward(
     curr_u: User = Depends(get_current_valid_user),
 ) -> None:
     existing_r = get_existing_reward(r_id, db)
-    existing_c = get_existing_campaign(existing_r.campaign_id, db)  
+    existing_c = get_existing_campaign(existing_r.campaign_id, db)
 
     if not has_access_over(existing_c, curr_u):
         raise NotAllowedErr

@@ -5,7 +5,7 @@ from app.core.security import (
     has_access_over,
     hash_password,
 )
-from app.core.utils import ImageNotFoundErr, get_existing_image
+from app.core.utils import get_existing_image
 from app.data.crud import user
 from app.data.crud.user import User, UserCreate, UserRead, UserUpdate
 from app.data.session import get_db
@@ -53,12 +53,8 @@ async def update_user(
         if u.password:
             u.password = hash_password(u.password)
 
-        if u.portrait:
-            _ = get_existing_image(u.portrait, db)
-
-        # TODO find a better way to handle this
-        if u.portrait == 0:
-            raise ImageNotFoundErr
+        if u.portrait_id:
+            _ = get_existing_image(u.portrait_id, db)
 
         user.update(id, u, db)
         updated_u = user.read(id, db)

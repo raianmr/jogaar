@@ -11,6 +11,7 @@ class Reward(Base):
 
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
+    picture_id = Column(Integer, ForeignKey("images.id", ondelete="CASCADE"))
 
     pledge = Column(Integer, nullable=False)
 
@@ -26,12 +27,14 @@ class RewardCreate(BaseModel):
 class RewardRead(BaseRead):
     title: str
     description: str
+    picture_id: int | None
     pledge: int
 
 
 class RewardUpdate(BaseModel):
     title: str | None
     description: str | None
+    picture_id: int | None
     pledge: int | None
 
 
