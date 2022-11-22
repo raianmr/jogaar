@@ -2,7 +2,7 @@ from enum import Enum
 
 from app.data.base import Base, BaseRead
 from pydantic import BaseModel, EmailStr
-from sqlalchemy import Boolean, Column, String, text
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import Session
 
 
@@ -21,6 +21,7 @@ class User(Base):
     about = Column(String)
     contact = Column(String)
     address = Column(String)
+    portrait = Column(Integer, ForeignKey("images.id", ondelete="CASCADE"))
 
     access_level = Column(String, server_default=Access.NORMAL, nullable=False)
 
@@ -34,9 +35,12 @@ class UserCreate(BaseModel):
 class UserRead(BaseRead):
     name: str
     email: EmailStr
+
     about: str | None
     contact: str | None
     address: str | None
+    portrait: int | None
+
     access_level: Access
 
 
@@ -44,9 +48,11 @@ class UserUpdate(BaseModel):
     name: str | None
     email: EmailStr | None
     password: str | None
+    
     about: str | None
     contact: str | None
     address: str | None
+    portrait: int | None
 
 
 def create(u: UserCreate, db: Session) -> User:

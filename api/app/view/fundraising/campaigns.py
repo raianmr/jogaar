@@ -1,5 +1,10 @@
-from app.core.campaigning import MiscConflictErr, get_existing_campaign
 from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
+from app.core.utils import (
+    ImageNotFoundErr,
+    MiscConflictErr,
+    get_existing_campaign,
+    get_existing_image,
+)
 from app.data.crud import bookmark, campaign
 from app.data.crud.campaign import (
     Campaign,
@@ -48,6 +53,13 @@ async def update_campaign(
         raise NotAllowedErr
 
     try:
+        if c.cover:
+            _ = get_existing_image(c.cover, db)
+
+        # TODO find a better way to handle this
+        if c.cover == 0:
+            raise ImageNotFoundErr
+
         campaign.update(id, c, db)
         updated_c = campaign.read(id, db)
 

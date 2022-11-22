@@ -3,10 +3,7 @@ from functools import singledispatch
 from typing import Callable
 
 from app.core.config import env
-from app.data.crud import user
-from app.data.crud.campaign import Campaign, State
-from app.data.crud.reply import Reply
-from app.data.crud.user import Access, User
+from app.data.crud import campaign, image, reply, user
 from app.data.session import get_db
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -104,23 +101,23 @@ def verify_access_token(token: str) -> TokenData:
     return token_data
 
 
-def is_valid(u: User) -> bool:
-    return Access.BANNED != u.access_level
+def is_valid(u: user.User) -> bool:
+    return user.Access.BANNED != u.access_level
 
 
-def is_super(u: User) -> bool:
-    return u.access_level in [Access.MOD, Access.ADMIN]
+def is_super(u: user.User) -> bool:
+    return u.access_level in [user.Access.MOD, user.Access.ADMIN]
 
 
-def is_admin(u: User) -> bool:
-    return Access.ADMIN == u.access_level
+def is_admin(u: user.User) -> bool:
+    return user.Access.ADMIN == u.access_level
 
 
 # for securing resources
 
 
 @singledispatch
-def has_access_over(r, curr_u: User) -> bool:
+def has_access_over(r, curr_u: user.User) -> bool:
     if is_super(curr_u):
         return True
 
@@ -131,7 +128,7 @@ def has_access_over(r, curr_u: User) -> bool:
 
 
 @has_access_over.register
-def _(u: User, curr_u: User) -> bool:
+def _(u: user.User, curr_u: user.User) -> bool:
     if is_super(curr_u):
         return True
 
@@ -142,18 +139,18 @@ def _(u: User, curr_u: User) -> bool:
 
 
 @has_access_over.register
-def _(c: Campaign, curr_u: User) -> bool:
+def _(c: campaign.Campaign, curr_u: user.User) -> bool:
     if is_super(curr_u):
         return True
 
-    if c.campaigner_id == curr_u.id and c.current_state != State.LOCKED:
+    if c.campaigner_id == curr_u.id and c.current_state != campaign.State.LOCKED:
         return True
 
     return False
 
 
 @has_access_over.register
-def _(r: Reply, curr_u: User) -> bool:
+def _(r: reply.Reply, curr_u: user.User) -> bool:
     if is_super(curr_u):
         return True
 
@@ -163,10 +160,21 @@ def _(r: Reply, curr_u: User) -> bool:
     return False
 
 
+@has_access_over.register
+def _(img: image.Image, curr_u: user.User) -> bool:
+    if is_super(curr_u):
+        return True
+
+    if img.uploader_id == curr_u.id:
+        return True
+
+    return False
+
+
 # for securing endpoints
 
 
-def get_existing_user(user_id: int, db: Session) -> User:
+def get_existing_user(user_id: int, db: Session) -> user.User:
     existing_u = user.read(user_id, db)
     if not existing_u:
         raise UserNotFoundErr
@@ -176,7 +184,7 @@ def get_existing_user(user_id: int, db: Session) -> User:
 
 def get_current_user(
     token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
-) -> User:
+) -> user.User:
 
     token_data = verify_access_token(token)
 
@@ -185,11 +193,20 @@ def get_current_user(
     return existing_u
 
 
+def try_current_user(
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+) -> user.User | None:
+    try:
+        return get_current_user(token, db)
+    except Exception:
+        return None
+
+
 class AuthorizedUser:
-    def __init__(self, criterion: Callable[[User], bool]) -> None:
+    def __init__(self, criterion: Callable[[user.User], bool]) -> None:
         self.authorized = criterion
 
-    def __call__(self, curr_u: User = Depends(get_current_user)) -> User:
+    def __call__(self, curr_u: user.User = Depends(get_current_user)) -> user.User:
         if not self.authorized(curr_u):
             raise NotAllowedErr
 

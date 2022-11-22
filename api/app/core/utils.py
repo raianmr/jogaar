@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
-from app.core.security import Access, NotAllowedErr, get_current_valid_user, is_super
-from app.data.crud import bookmark, campaign, reply, update
+from app.core.security import NotAllowedErr, get_current_valid_user, is_super
+from app.data.crud import bookmark, campaign, image, reply, update
 from app.data.crud.campaign import Campaign
 from app.data.crud.reply import Reply
 from app.data.crud.update import Update
@@ -45,6 +45,14 @@ class ReplyNotFoundErr(HTTPException):
         )
 
 
+class ImageNotFoundErr(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="image was not found",
+        )
+
+
 def get_existing_campaign(campaign_id: int | Column, db: Session) -> Campaign:
     existing_c = campaign.read(campaign_id, db)
     if not existing_c:
@@ -76,6 +84,17 @@ def get_existing_reply(update_id: int, db: Session) -> Reply:
         raise ReplyNotFoundErr
 
     return existing_r
+
+
+def get_existing_image(image_id: int, db: Session) -> image.Image:
+    existing_img = image.read(image_id, db)
+    if not existing_img:
+        raise ImageNotFoundErr
+
+    if not existing_img.location:
+        raise ImageNotFoundErr
+
+    return existing_img
 
 
 def has_crossed_deadline(c: Campaign) -> bool:

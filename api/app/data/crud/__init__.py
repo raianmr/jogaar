@@ -3,6 +3,7 @@
 from .bookmark import Bookmark
 from .campaign import Campaign
 from .faq import FAQ
+from .image import Image
 from .milestone import Milestone
 from .pledge import Pledge
 from .reply import Reply

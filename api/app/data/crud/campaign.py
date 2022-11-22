@@ -25,6 +25,7 @@ class Campaign(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
     challenges = Column(String, nullable=False)
+    cover = Column(Integer, ForeignKey("images.id", ondelete="CASCADE"))
 
     goal = Column(Integer, nullable=False)
     pledged = Column(Integer, server_default="0", nullable=False)
@@ -53,6 +54,7 @@ class CampaignRead(BaseRead):
     title: str
     description: str
     challenges: str
+    cover: int | None
 
     goal: int
     pledged: int
@@ -69,6 +71,7 @@ class CampaignUpdate(BaseModel):
     title: str | None
     description: str | None
     challenges: str | None
+    cover: int | None
 
 
 def create(u_id: int | Column, c: CampaignCreate, db: Session) -> Campaign:

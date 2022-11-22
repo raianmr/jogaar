@@ -1,9 +1,14 @@
+import pathlib
+
 import uvicorn
 from app.core.config import env
 from app.view import auth, funding, fundraising, lookup, social
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from starlette.responses import RedirectResponse
+
+# TODO use env vars for these
 
 app = FastAPI(
     title="Jogaar",
@@ -19,13 +24,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-for router in [
+staticdir = pathlib.Path("static")
+staticdir.mkdir(parents=True, exist_ok=True)
+app.mount("/static", StaticFiles(directory=staticdir), name="static")
+
+routers = [
     auth.router,
     funding.router,
     fundraising.router,
     lookup.router,
     social.router,
-]:
+]
+
+for router in routers:
     app.include_router(router)
 
 

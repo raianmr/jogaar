@@ -1,4 +1,4 @@
-from app.core.campaigning import (
+from app.core.utils import (
     MiscConflictErr,
     get_existing_campaign,
     get_existing_reply,

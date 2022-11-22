@@ -1,4 +1,4 @@
-from app.core.campaigning import get_existing_campaign, get_existing_reply
+from app.core.utils import get_existing_campaign, get_existing_reply
 from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
 from app.data.crud import vote
 from app.data.crud.user import User
