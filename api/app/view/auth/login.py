@@ -19,7 +19,7 @@ async def login_user(
 ) -> dict:
     existing_u = user.read_by_email(creds.username, db)
 
-    if not existing_u:
+    if existing_u is None:
         raise AuthenticatingErr
 
     if not verify_password(creds.password, existing_u.password): 

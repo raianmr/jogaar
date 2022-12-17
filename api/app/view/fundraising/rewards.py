@@ -29,7 +29,7 @@ class RewardNotFoundErr(HTTPException):
 
 def get_existing_reward(reward_id: int, db: Session) -> Reward:
     existing_r = reward.read(reward_id, db)
-    if not existing_r:
+    if existing_r is None:
         raise RewardNotFoundErr
 
     return existing_r
@@ -74,7 +74,7 @@ async def update_reward(
         raise NotAllowedErr
 
     try:
-        if r.picture_id:
+        if r.picture_id is not None:
             _ = get_existing_image(r.picture_id, db)
 
         reward.update(r_id, r, db)

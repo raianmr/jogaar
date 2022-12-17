@@ -29,7 +29,7 @@ class FAQNotFoundErr(HTTPException):
 
 def get_existing_faq(faq_id: int, db: Session) -> FAQ:
     existing_f = faq.read(faq_id, db)
-    if not existing_f:
+    if existing_f is None:
         raise FAQNotFoundErr
 
     return existing_f

@@ -48,7 +48,7 @@ async def update_campaign(
         raise NotAllowedErr
 
     try:
-        if c.cover_id:
+        if c.cover_id is not None:
             _ = get_existing_image(c.cover_id, db)
 
         campaign.update(id, c, db)

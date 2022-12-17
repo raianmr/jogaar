@@ -50,10 +50,10 @@ async def update_user(
 
     try:
         # FIX tests for this part
-        if u.password:
+        if u.password is not None:
             u.password = hash_password(u.password)
 
-        if u.portrait_id:
+        if u.portrait_id is not None:
             _ = get_existing_image(u.portrait_id, db)
 
         user.update(id, u, db)

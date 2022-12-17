@@ -31,7 +31,7 @@ class BookmarkNotFoundErr(HTTPException):
 
 def get_existing_bookmark(u_id: int, c_id: int, db: Session) -> Bookmark:
     existing_b = bookmark.read_by_user_and_campaign(u_id, c_id, db)
-    if not existing_b:
+    if existing_b is None:
         raise BookmarkNotFoundErr
 
     return existing_b

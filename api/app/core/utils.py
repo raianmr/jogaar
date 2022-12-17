@@ -55,7 +55,7 @@ class ImageNotFoundErr(HTTPException):
 
 def get_existing_campaign(campaign_id: int | Column, db: Session) -> Campaign:
     existing_c = campaign.read(campaign_id, db)
-    if not existing_c:
+    if existing_c is None:
         raise CampaignNotFoundErr
 
     return existing_c
@@ -72,7 +72,7 @@ def campaign_with_meta(existing_c: Campaign, existing_u: User, db: Session):
 
 def get_existing_update(update_id: int, db: Session) -> Update:
     existing_u = update.read(update_id, db)
-    if not existing_u:
+    if existing_u is None:
         raise UpdateNotFoundErr
 
     return existing_u
@@ -80,7 +80,7 @@ def get_existing_update(update_id: int, db: Session) -> Update:
 
 def get_existing_reply(update_id: int, db: Session) -> Reply:
     existing_r = reply.read(update_id, db)
-    if not existing_r:
+    if existing_r is None:
         raise ReplyNotFoundErr
 
     return existing_r
@@ -88,14 +88,14 @@ def get_existing_reply(update_id: int, db: Session) -> Reply:
 
 def get_existing_image(img_id: int, db: Session) -> image.Image:
     # TODO find a better way to handle this
-    if img_id == 0:
+    if img_id <= 0:
         raise ImageNotFoundErr
 
     existing_img = image.read(img_id, db)
-    if not existing_img:
+    if existing_img is None:
         raise ImageNotFoundErr
 
-    if not existing_img.location:
+    if existing_img.location is None:
         raise ImageNotFoundErr
 
     return existing_img

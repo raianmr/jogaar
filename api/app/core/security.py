@@ -71,7 +71,7 @@ def verify_password(plain_password: str, hashed_password: str | Column) -> bool:
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
 
-    if expires_delta:
+    if expires_delta is not None:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(
@@ -90,7 +90,7 @@ def verify_access_token(token: str) -> TokenData:
         payload = jwt.decode(token, env.SECRET_KEY, algorithms=[env.ALGORITHM])
         user_id = payload.get("user_id")
 
-        if not user_id:
+        if user_id is None:
             raise AuthenticatingErr
 
         token_data = TokenData(id=user_id)
@@ -176,7 +176,7 @@ def _(img: image.Image, curr_u: user.User) -> bool:
 
 def get_existing_user(user_id: int, db: Session) -> user.User:
     existing_u = user.read(user_id, db)
-    if not existing_u:
+    if existing_u is None:
         raise UserNotFoundErr
 
     return existing_u

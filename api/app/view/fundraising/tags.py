@@ -29,7 +29,7 @@ class TagNotFoundErr(HTTPException):
 
 def get_existing_tag(tag_id: int, db: Session) -> Tag:
     existing_t = tag.read(tag_id, db)
-    if not existing_t:
+    if existing_t is None:
         raise TagNotFoundErr
 
     return existing_t

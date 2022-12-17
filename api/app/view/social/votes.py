@@ -31,7 +31,7 @@ class VoteNotFoundErr(HTTPException):
 
 def get_existing_vote(u_id: int, r_id: int, db: Session) -> Vote:
     existing_b = vote.read_by_user_and_reply(u_id, r_id, db)
-    if not existing_b:
+    if existing_b is None:
         raise VoteNotFoundErr
 
     return existing_b

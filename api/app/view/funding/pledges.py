@@ -29,7 +29,7 @@ class PledgeNotFoundErr(HTTPException):
 
 def get_existing_pledge(u_id: int, c_id: int, db: Session) -> Pledge:
     existing_p = pledge.read_by_user_and_campaign(u_id, c_id, db)
-    if not existing_p:
+    if existing_p is None:
         raise PledgeNotFoundErr
 
     return existing_p

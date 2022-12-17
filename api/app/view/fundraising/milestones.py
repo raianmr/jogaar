@@ -1,5 +1,5 @@
 from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
-from app.core.utils import get_existing_campaign, get_existing_image
+from app.core.utils import ImageNotFoundErr, get_existing_campaign, get_existing_image
 from app.data.crud import milestone
 from app.data.crud.milestone import (
     Milestone,
@@ -34,7 +34,7 @@ class MilestoneNotFoundErr(HTTPException):
 
 def get_existing_milestone(milestone_id: int, db: Session) -> Milestone:
     existing_m = milestone.read(milestone_id, db)
-    if not existing_m:
+    if existing_m is None:
         raise MilestoneNotFoundErr
 
     return existing_m
@@ -79,7 +79,7 @@ async def update_milestone(
         raise NotAllowedErr
 
     try:
-        if m.picture_id:
+        if m.picture_id is not None:
             _ = get_existing_image(m.picture_id, db)
 
         milestone.update(m_id, m, db)

@@ -137,7 +137,7 @@ async def read_report(
     curr_u: User = Depends(get_current_super_user),
 ) -> Report:
     existing_report = report.read(id, db)
-    if not existing_report:
+    if existing_report is None:
         raise ReportNotFoundErr
 
     return existing_report

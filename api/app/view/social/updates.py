@@ -55,7 +55,7 @@ async def update_update(
         raise NotAllowedErr
 
     try:
-        if u.picture_id:
+        if u.picture_id is not None:
             _ = get_existing_image(u.picture_id, db)
 
         update.update(existing_up.id, u, db)
