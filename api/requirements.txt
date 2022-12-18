@@ -6,6 +6,9 @@ SQLAlchemy
 psycopg2
 alembic
 
+# searching
+rapidfuzz
+
 # auth
 python-jose[cryptography]
 passlib[bcrypt]
