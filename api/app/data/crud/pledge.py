@@ -59,6 +59,20 @@ def read_by_user_and_campaign(
     )
 
 
+def calc_total_pledged(c_id: int | sa.Column, db: Session) -> int:
+    s = (
+        sa.select(sa.func.sum(Pledge.amount))
+        .where(Pledge.campaign_id == c_id)
+        .group_by(Pledge.campaign_id)
+    )
+    total = db.execute(s).scalar()
+
+    if total is None:
+        return 0
+
+    return total
+
+
 def read_all_by_user(
     u_id: int | sa.Column, limit: int, offset: int, db: Session
 ) -> list[Pledge]:

@@ -9,8 +9,6 @@ from sqlalchemy.orm import Session
 
 router = APIRouter()
 
-# TODO find a better way to handle changes to the raised amount
-
 
 class PledgerAndCampaignConflictErr(HTTPException):
     def __init__(self) -> None:
@@ -54,7 +52,10 @@ async def create_pledge(
         new_p = pledge.create(curr_u.id, existing_c.id, p, db)
         if existing_b is None:
             _ = bookmark.create(curr_u.id, existing_c.id, db)
-        campaign.update_pledged(existing_c.id, existing_c.pledged + p.amount, db)  # type: ignore
+
+        campaign.update_pledged(
+            existing_c.id, pledge.calc_total_pledged(existing_c.id, db), db
+        )
     except IntegrityError:
         raise PledgerAndCampaignConflictErr
 
@@ -69,14 +70,15 @@ async def update_pledge(
     curr_u: User = Depends(security.get_current_valid_user),
 ) -> Pledge | None:
     existing_p = get_existing_pledge(curr_u.id, c_id, db)  # type: ignore
-    old_pledged = existing_p.amount
     existing_c = utils.get_existing_campaign(existing_p.campaign_id, db)
 
     try:
         pledge.update(existing_p.id, p, db)
         updated_p = pledge.read(existing_p.id, db)
-        campaign.update_pledged(existing_c.id, existing_c.pledged - old_pledged + p.amount, db)  # type: ignore
 
+        campaign.update_pledged(
+            existing_c.id, pledge.calc_total_pledged(existing_c.id, db), db
+        )
     except IntegrityError:
         raise PledgerAndCampaignConflictErr
 
@@ -93,9 +95,11 @@ async def delete_pledge(
     curr_u: User = Depends(security.get_current_valid_user),
 ) -> None:
     existing_p = get_existing_pledge(curr_u.id, c_id, db)  # type: ignore
-    old_pledged = existing_p.amount
     existing_c = utils.get_existing_campaign(existing_p.campaign_id, db)
-    campaign.update_pledged(existing_c.id, existing_c.pledged - old_pledged, db)  # type: ignore
+
+    campaign.update_pledged(
+        existing_c.id, pledge.calc_total_pledged(existing_c.id, db), db
+    )
 
     pledge.delete_by_user_and_campaign(curr_u.id, existing_c.id, db)
 
