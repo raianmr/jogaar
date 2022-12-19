@@ -1,35 +1,27 @@
 from datetime import datetime
 
+import sqlalchemy as sa
 from app.data.base import Base, BaseRead
 from pydantic import BaseModel
-from sqlalchemy import (
-    TIMESTAMP,
-    Column,
-    ForeignKey,
-    Integer,
-    String,
-    UniqueConstraint,
-    text,
-)
 from sqlalchemy.orm import Session
 
 
 class Milestone(Base):
-    campaign_id = Column(
-        Integer, ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
+    campaign_id = sa.Column(
+        sa.Integer, sa.ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
     )
 
-    title = Column(String, nullable=False)
-    description = Column(String, nullable=False)
-    picture_id = Column(Integer, ForeignKey("images.id", ondelete="CASCADE"))
+    title = sa.Column(sa.String, nullable=False)
+    description = sa.Column(sa.String, nullable=False)
+    picture_id = sa.Column(sa.Integer, sa.ForeignKey("images.id", ondelete="CASCADE"))
 
-    deadline = Column(
-        TIMESTAMP(timezone=True),
-        server_default=text("NOW() + INTERVAL '1 week'"),
+    deadline = sa.Column(
+        sa.TIMESTAMP(timezone=True),
+        server_default=sa.text("NOW() + INTERVAL '1 week'"),
         nullable=False,
     )
 
-    __table_args__ = tuple(UniqueConstraint(campaign_id, deadline))
+    __table_args__ = tuple(sa.UniqueConstraint(campaign_id, deadline))
 
 
 class MilestoneCreate(BaseModel):
@@ -52,7 +44,7 @@ class MilestoneUpdate(BaseModel):
     deadline: datetime | None
 
 
-def create(c_id: int | Column, m: MilestoneCreate, db: Session) -> Milestone:
+def create(c_id: int | sa.Column, m: MilestoneCreate, db: Session) -> Milestone:
     new_m = Milestone(campaign_id=c_id, **m.dict())  # type: ignore
     db.add(new_m)
 
@@ -62,12 +54,12 @@ def create(c_id: int | Column, m: MilestoneCreate, db: Session) -> Milestone:
     return new_m
 
 
-def read(id: int | Column, db: Session) -> Milestone | None:
+def read(id: int | sa.Column, db: Session) -> Milestone | None:
     return db.query(Milestone).filter(Milestone.id == id).first()
 
 
 def read_all_by_campaign(
-    c_id: int | Column, limit: int, offset: int, db: Session
+    c_id: int | sa.Column, limit: int, offset: int, db: Session
 ) -> list[Milestone]:
     return (
         db.query(Milestone)
@@ -82,13 +74,13 @@ def read_all(limit: int, offset: int, db: Session) -> list[Milestone]:
     return db.query(Milestone).limit(limit).offset(offset).all()
 
 
-def update(id: int | Column, m: MilestoneUpdate, db: Session) -> None:
+def update(id: int | sa.Column, m: MilestoneUpdate, db: Session) -> None:
     db.query(Milestone).filter(Milestone.id == id).update(m.dict(exclude_unset=True))
 
     db.commit()
 
 
-def delete(id: int | Column, db: Session) -> None:
+def delete(id: int | sa.Column, db: Session) -> None:
     db.query(Milestone).filter(Milestone.id == id).delete()
 
     db.commit()

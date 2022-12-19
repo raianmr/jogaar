@@ -1,18 +1,19 @@
 from pathlib import Path
 
+import sqlalchemy as sa
 from app.data.base import Base, BaseRead
-from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import Session
 
 
 class Image(Base):
-    uploader_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    uploader_id = sa.Column(
+        sa.Integer, sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
 
-    filename = Column(String, nullable=False)
-    filetype = Column(String, nullable=False)
-    location = Column(String)
+    filename = sa.Column(sa.String, nullable=False)
+    filetype = sa.Column(sa.String, nullable=False)
+    location = sa.Column(sa.String)
+
 
 class ImageRead(BaseRead):
     uploader_id: int
@@ -34,7 +35,7 @@ def store(img: Image, contents: bytes) -> str:
 
 
 def create(
-    u_id: int | Column,
+    u_id: int | sa.Column,
     name: str,
     type: str,
     contents: bytes,
@@ -63,7 +64,7 @@ def create(
     return new_image
 
 
-def read(id: int | Column, db: Session) -> Image | None:
+def read(id: int | sa.Column, db: Session) -> Image | None:
     return db.query(Image).filter(Image.id == id).first()
 
 
@@ -72,7 +73,7 @@ def read_all(limit: int, offset: int, db: Session) -> list[Image]:
 
 
 def read_all_by_user(
-    u_id: int | Column, limit: int, offset: int, db: Session
+    u_id: int | sa.Column, limit: int, offset: int, db: Session
 ) -> list[Image]:
     return (
         db.query(Image)
@@ -83,7 +84,7 @@ def read_all_by_user(
     )
 
 
-def delete(id: int | Column, db: Session) -> None:
+def delete(id: int | sa.Column, db: Session) -> None:
     db.query(Image).filter(Image.id == id).delete()
 
     db.commit()

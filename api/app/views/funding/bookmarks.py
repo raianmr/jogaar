@@ -1,5 +1,4 @@
-from app.core.utils import get_existing_campaign
-from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
+from app.core import security, utils
 from app.data.crud import bookmark
 from app.data.crud.bookmark import Bookmark, BookmarkRead
 from app.data.crud.user import User
@@ -45,9 +44,9 @@ def get_existing_bookmark(u_id: int, c_id: int, db: Session) -> Bookmark:
 async def create_bookmark(
     c_id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Bookmark:
-    existing_c = get_existing_campaign(c_id, db)
+    existing_c = utils.get_existing_campaign(c_id, db)
 
     try:
         new_b = bookmark.create(curr_u.id, existing_c.id, db)
@@ -65,10 +64,10 @@ async def create_bookmark(
 async def delete_bookmark(
     c_id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> None:
     existing_b = get_existing_bookmark(curr_u.id, c_id, db)  # type: ignore
-    existing_c = get_existing_campaign(existing_b.campaign_id, db)
+    existing_c = utils.get_existing_campaign(existing_b.campaign_id, db)
 
     bookmark.delete_by_user_and_campaign(curr_u.id, existing_c.id, db)
 

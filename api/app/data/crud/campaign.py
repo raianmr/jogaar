@@ -7,7 +7,6 @@ from app.data.crud.bookmark import Bookmark
 from app.data.crud.pledge import Pledge
 from app.data.crud.tag import Tag
 from pydantic import BaseModel
-from rapidfuzz import fuzz
 from sqlalchemy.orm import Session
 
 

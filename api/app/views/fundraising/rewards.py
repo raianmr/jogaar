@@ -1,5 +1,4 @@
-from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
-from app.core.utils import get_existing_campaign, get_existing_image
+from app.core import security, utils
 from app.data.crud import reward
 from app.data.crud.reward import Reward, RewardCreate, RewardRead, RewardUpdate
 from app.data.crud.user import User
@@ -44,12 +43,12 @@ async def create_reward(
     c_id: int,
     r: RewardCreate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Reward:
-    existing_c = get_existing_campaign(c_id, db)
+    existing_c = utils.get_existing_campaign(c_id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     try:
         new_r = reward.create(c_id, r, db)
@@ -65,17 +64,17 @@ async def update_reward(
     r_id: int,
     r: RewardUpdate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Reward | None:
     existing_r = get_existing_reward(r_id, db)
-    existing_c = get_existing_campaign(existing_r.campaign_id, db)
+    existing_c = utils.get_existing_campaign(existing_r.campaign_id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     try:
         if r.picture_id is not None:
-            _ = get_existing_image(r.picture_id, db)
+            _ = utils.get_existing_image(r.picture_id, db)
 
         reward.update(r_id, r, db)
         updated_r = reward.read(r_id, db)
@@ -93,13 +92,13 @@ async def update_reward(
 async def delete_reward(
     r_id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> None:
     existing_r = get_existing_reward(r_id, db)
-    existing_c = get_existing_campaign(existing_r.campaign_id, db)
+    existing_c = utils.get_existing_campaign(existing_r.campaign_id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     reward.delete(r_id, db)
 

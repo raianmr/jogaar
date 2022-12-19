@@ -1,19 +1,19 @@
 from app.data.base import Base, BaseRead
 from pydantic import BaseModel
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, text
+import sqlalchemy as sa
 from sqlalchemy.orm import Session
 
 
 class Update(Base):
-    campaign_id = Column(
-        Integer, ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
+    campaign_id = sa.Column(
+        sa.Integer, sa.ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
     )
 
-    title = Column(String, nullable=False)
-    content = Column(String, nullable=False)
-    picture_id = Column(Integer, ForeignKey("images.id", ondelete="CASCADE"))
+    title = sa.Column(sa.String, nullable=False)
+    content = sa.Column(sa.String, nullable=False)
+    picture_id = sa.Column(sa.Integer, sa.ForeignKey("images.id", ondelete="CASCADE"))
 
-    edited = Column(Boolean, server_default=text("False"), nullable=False)
+    edited = sa.Column(sa.Boolean, server_default=sa.text("False"), nullable=False)
 
 
 class UpdateCreate(BaseModel):
@@ -37,7 +37,7 @@ class UpdateUpdate(BaseModel):
     picture_id: int | None
 
 
-def create(c_id: int | Column, up: UpdateCreate, db: Session) -> Update:
+def create(c_id: int | sa.Column, up: UpdateCreate, db: Session) -> Update:
     new_up = Update(campaign_id=c_id, **up.dict())  # type: ignore
     db.add(new_up)
 
@@ -47,12 +47,12 @@ def create(c_id: int | Column, up: UpdateCreate, db: Session) -> Update:
     return new_up
 
 
-def read(id: int | Column, db: Session) -> Update | None:
+def read(id: int | sa.Column, db: Session) -> Update | None:
     return db.query(Update).filter(Update.id == id).first()
 
 
 def read_all_by_campaign(
-    c_id: int | Column, limit: int, offset: int, db: Session
+    c_id: int | sa.Column, limit: int, offset: int, db: Session
 ) -> list[Update]:
     return (
         db.query(Update)
@@ -67,7 +67,7 @@ def read_all(limit: int, offset: int, db: Session) -> list[Update]:
     return db.query(Update).limit(limit).offset(offset).all()
 
 
-def update(id: int | Column, up: UpdateUpdate, db: Session) -> None:
+def update(id: int | sa.Column, up: UpdateUpdate, db: Session) -> None:
     db.query(Update).filter(Update.id == id).update(
         {Update.edited: True, **up.dict(exclude_unset=True)}
     )
@@ -75,7 +75,7 @@ def update(id: int | Column, up: UpdateUpdate, db: Session) -> None:
     db.commit()
 
 
-def delete(id: int | Column, db: Session) -> None:
+def delete(id: int | sa.Column, db: Session) -> None:
     db.query(Update).filter(Update.id == id).delete()
 
     db.commit()

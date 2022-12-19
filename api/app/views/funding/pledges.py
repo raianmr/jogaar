@@ -1,5 +1,4 @@
-from app.core.utils import get_existing_campaign
-from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
+from app.core import security, utils
 from app.data.crud import pledge
 from app.data.crud.pledge import Pledge, PledgeCreate, PledgeRead, PledgeUpdate
 from app.data.crud.user import User
@@ -44,9 +43,9 @@ async def create_pledge(
     c_id: int,
     p: PledgeCreate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Pledge:
-    existing_c = get_existing_campaign(c_id, db)
+    existing_c = utils.get_existing_campaign(c_id, db)
 
     try:
         new_p = pledge.create(curr_u.id, existing_c.id, p, db)
@@ -62,10 +61,10 @@ async def update_pledge(
     c_id: int,
     p: PledgeUpdate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Pledge | None:
     existing_p = get_existing_pledge(curr_u.id, c_id, db)  # type: ignore
-    existing_c = get_existing_campaign(existing_p.campaign_id, db)
+    existing_c = utils.get_existing_campaign(existing_p.campaign_id, db)
 
     try:
         pledge.update(existing_p.id, p, db)
@@ -84,10 +83,10 @@ async def update_pledge(
 async def delete_pledge(
     c_id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> None:
     existing_p = get_existing_pledge(curr_u.id, c_id, db)  # type: ignore
-    existing_c = get_existing_campaign(existing_p.campaign_id, db)
+    existing_c = utils.get_existing_campaign(existing_p.campaign_id, db)
 
     pledge.delete_by_user_and_campaign(curr_u.id, existing_c.id, db)
 

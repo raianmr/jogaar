@@ -1,11 +1,4 @@
-from app.core.security import (
-    NotAllowedErr,
-    get_current_valid_user,
-    get_existing_user,
-    has_access_over,
-    hash_password,
-)
-from app.core.utils import get_existing_image
+from app.core import security, utils
 from app.data.crud import user
 from app.data.crud.user import User, UserCreate, UserRead, UserUpdate
 from app.data.session import get_db
@@ -27,7 +20,7 @@ class EmailConflictErr(HTTPException):
 @router.post("/users", status_code=status.HTTP_201_CREATED, response_model=UserRead)
 async def create_user(u: UserCreate, db: Session = Depends(get_db)) -> User:
     try:
-        u.password = hash_password(u.password)
+        u.password = security.hash_password(u.password)
         new_u = user.create(u, db)
 
     except IntegrityError:
@@ -41,20 +34,20 @@ async def update_user(
     id: int,
     u: UserUpdate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> User | None:
-    existing_u = get_existing_user(id, db)
+    existing_u = security.get_existing_user(id, db)
 
-    if not has_access_over(existing_u, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_u, curr_u):
+        raise security.NotAllowedErr
 
     try:
         # FIX tests for this part
         if u.password is not None:
-            u.password = hash_password(u.password)
+            u.password = security.hash_password(u.password)
 
         if u.portrait_id is not None:
-            _ = get_existing_image(u.portrait_id, db)
+            _ = utils.get_existing_image(u.portrait_id, db)
 
         user.update(id, u, db)
         updated_u = user.read(id, db)
@@ -69,19 +62,19 @@ async def update_user(
 async def delete_user(
     id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> None:
-    existing_u = get_existing_user(id, db)
+    existing_u = security.get_existing_user(id, db)
 
-    if not has_access_over(existing_u, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_u, curr_u):
+        raise security.NotAllowedErr
 
     user.delete(id, db)
 
 
 @router.get("/users/current", response_model=UserRead)
 async def read_current_user(
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> User:
 
     return curr_u
@@ -89,7 +82,7 @@ async def read_current_user(
 
 @router.get("/users/{id}", response_model=UserRead)
 async def read_user(id: int, db: Session = Depends(get_db)) -> User:
-    existing_u = get_existing_user(id, db)
+    existing_u = security.get_existing_user(id, db)
 
     return existing_u
 

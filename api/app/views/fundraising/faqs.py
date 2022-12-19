@@ -1,5 +1,4 @@
-from app.core.utils import get_existing_campaign
-from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
+from app.core import security, utils
 from app.data.crud import faq
 from app.data.crud.faq import FAQ, FAQCreate, FAQRead, FAQUpdate
 from app.data.crud.user import User
@@ -44,12 +43,12 @@ async def create_faq(
     c_id: int,
     f: FAQCreate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> FAQ:
-    existing_c = get_existing_campaign(c_id, db)
+    existing_c = utils.get_existing_campaign(c_id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     try:
         new_f = faq.create(c_id, f, db)
@@ -65,13 +64,13 @@ async def update_faq(
     f_id: int,
     f: FAQUpdate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> FAQ | None:
     existing_f = get_existing_faq(f_id, db)
-    existing_c = get_existing_campaign(existing_f.campaign_id, db) 
+    existing_c = utils.get_existing_campaign(existing_f.campaign_id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     try:
         faq.update(f_id, f, db)
@@ -90,13 +89,13 @@ async def update_faq(
 async def delete_faq(
     f_id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ):
     existing_f = get_existing_faq(f_id, db)
-    existing_c = get_existing_campaign(existing_f.campaign_id, db) 
+    existing_c = utils.get_existing_campaign(existing_f.campaign_id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     faq.delete(f_id, db)
 

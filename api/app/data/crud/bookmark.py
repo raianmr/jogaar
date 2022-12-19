@@ -1,18 +1,18 @@
+import sqlalchemy as sa
 from app.data.base import Base, BaseRead
 from pydantic import BaseModel
-from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Session
 
 
 class Bookmark(Base):
-    user_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    user_id = sa.Column(
+        sa.Integer, sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    campaign_id = Column(
-        Integer, ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
+    campaign_id = sa.Column(
+        sa.Integer, sa.ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
     )
 
-    __table_args__ = tuple(UniqueConstraint(campaign_id, user_id))
+    __table_args__ = tuple(sa.UniqueConstraint(campaign_id, user_id))
 
 
 class BookmarkRead(BaseRead):
@@ -20,7 +20,7 @@ class BookmarkRead(BaseRead):
     campaign_id: int
 
 
-def create(u_id: int | Column, c_id: int | Column, db: Session) -> Bookmark:
+def create(u_id: int | sa.Column, c_id: int | sa.Column, db: Session) -> Bookmark:
     new_b = Bookmark(user_id=u_id, campaign_id=c_id)  # type: ignore
     db.add(new_b)
 
@@ -30,12 +30,12 @@ def create(u_id: int | Column, c_id: int | Column, db: Session) -> Bookmark:
     return new_b
 
 
-def read(id: int | Column, db: Session) -> Bookmark | None:
+def read(id: int | sa.Column, db: Session) -> Bookmark | None:
     return db.query(Bookmark).filter(Bookmark.id == id).first()
 
 
 def read_by_user_and_campaign(
-    u_id: int | Column, c_id: int | Column, db: Session
+    u_id: int | sa.Column, c_id: int | sa.Column, db: Session
 ) -> Bookmark | None:
     return (
         db.query(Bookmark)
@@ -45,7 +45,7 @@ def read_by_user_and_campaign(
 
 
 def read_all_by_user(
-    u_id: int | Column, limit: int, offset: int, db: Session
+    u_id: int | sa.Column, limit: int, offset: int, db: Session
 ) -> list[Bookmark]:
     return (
         db.query(Bookmark)
@@ -57,7 +57,7 @@ def read_all_by_user(
 
 
 def read_all_by_campaign(
-    c_id: int | Column, limit: int, offset: int, db: Session
+    c_id: int | sa.Column, limit: int, offset: int, db: Session
 ) -> list[Bookmark]:
     return (
         db.query(Bookmark)
@@ -72,14 +72,14 @@ def read_all(limit: int, offset: int, db: Session) -> list[Bookmark]:
     return db.query(Bookmark).limit(limit).offset(offset).all()
 
 
-def delete(id: int | Column, db: Session) -> None:
+def delete(id: int | sa.Column, db: Session) -> None:
     db.query(Bookmark).filter(Bookmark.id == id).delete()
 
     db.commit()
 
 
 def delete_by_user_and_campaign(
-    u_id: int | Column, c_id: int | Column, db: Session
+    u_id: int | sa.Column, c_id: int | sa.Column, db: Session
 ) -> None:
     db.query(Bookmark).filter(
         Bookmark.user_id == u_id, Bookmark.campaign_id == c_id

@@ -1,10 +1,9 @@
-from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
-from app.core.utils import ImageNotFoundErr, MiscConflictErr, get_existing_image
+from app.core import security, utils
 from app.data.crud import image
 from app.data.crud.image import Image, ImageRead
 from app.data.crud.user import User
 from app.data.session import get_db
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, UploadFile, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -18,7 +17,7 @@ router = APIRouter()
 async def upload_image(
     file: UploadFile = File(),
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Image:
     try:
         new_img = image.create(
@@ -30,7 +29,7 @@ async def upload_image(
         )
 
     except IntegrityError:
-        raise MiscConflictErr
+        raise utils.MiscConflictErr
 
     return new_img
 
@@ -39,18 +38,18 @@ async def upload_image(
 async def delete_image(
     id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> None:
-    existing_img = get_existing_image(id, db)
+    existing_img = utils.get_existing_image(id, db)
 
-    if not has_access_over(existing_img, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_img, curr_u):
+        raise security.NotAllowedErr
 
     image.delete(id, db)
 
 
 @router.get("/images/{id}", response_model=ImageRead)
 async def download_image(id: int, db: Session = Depends(get_db)) -> Image:
-    existing_img = get_existing_image(id, db)
+    existing_img = utils.get_existing_image(id, db)
 
     return existing_img

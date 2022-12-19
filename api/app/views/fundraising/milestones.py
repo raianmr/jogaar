@@ -1,5 +1,4 @@
-from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
-from app.core.utils import ImageNotFoundErr, get_existing_campaign, get_existing_image
+from app.core import security, utils
 from app.data.crud import milestone
 from app.data.crud.milestone import (
     Milestone,
@@ -49,12 +48,12 @@ async def create_milestone(
     c_id: int,
     m: MilestoneCreate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Milestone:
-    existing_c = get_existing_campaign(c_id, db)
+    existing_c = utils.get_existing_campaign(c_id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     try:
         new_m = milestone.create(c_id, m, db)
@@ -70,17 +69,17 @@ async def update_milestone(
     m_id: int,
     m: MilestoneUpdate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Milestone | None:
     existing_m = get_existing_milestone(m_id, db)
-    existing_c = get_existing_campaign(existing_m.campaign_id, db)
+    existing_c = utils.get_existing_campaign(existing_m.campaign_id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     try:
         if m.picture_id is not None:
-            _ = get_existing_image(m.picture_id, db)
+            _ = utils.get_existing_image(m.picture_id, db)
 
         milestone.update(m_id, m, db)
         updated_m = milestone.read(m_id, db)
@@ -98,13 +97,13 @@ async def update_milestone(
 async def delete_milestone(
     m_id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> None:
     existing_m = get_existing_milestone(m_id, db)
-    existing_c = get_existing_campaign(existing_m.campaign_id, db)
+    existing_c = utils.get_existing_campaign(existing_m.campaign_id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     milestone.delete(m_id, db)
 

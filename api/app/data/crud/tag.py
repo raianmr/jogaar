@@ -1,17 +1,17 @@
+import sqlalchemy as sa
 from app.data.base import Base, BaseRead
 from pydantic import BaseModel
-from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Session
 
 
 class Tag(Base):
-    campaign_id = Column(
-        Integer, ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
+    campaign_id = sa.Column(
+        sa.Integer, sa.ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
     )
 
-    name = Column(String, nullable=False)
+    name = sa.Column(sa.String, nullable=False)
 
-    __table_args__ = tuple(UniqueConstraint(campaign_id, name))
+    __table_args__ = tuple(sa.UniqueConstraint(campaign_id, name))
 
 
 class TagCreate(BaseModel):
@@ -26,7 +26,7 @@ class TagUpdate(BaseModel):
     name: str
 
 
-def create(c_id: int | Column, t: TagCreate, db: Session) -> Tag:
+def create(c_id: int | sa.Column, t: TagCreate, db: Session) -> Tag:
     new_t = Tag(campaign_id=c_id, **t.dict())  # type: ignore
     db.add(new_t)
 
@@ -36,12 +36,12 @@ def create(c_id: int | Column, t: TagCreate, db: Session) -> Tag:
     return new_t
 
 
-def read(id: int | Column, db: Session) -> Tag | None:
+def read(id: int | sa.Column, db: Session) -> Tag | None:
     return db.query(Tag).filter(Tag.id == id).first()
 
 
 def read_all_by_campaign(
-    c_id: int | Column, limit: int, offset: int, db: Session
+    c_id: int | sa.Column, limit: int, offset: int, db: Session
 ) -> list[Tag]:
     return (
         db.query(Tag).filter(Tag.campaign_id == c_id).limit(limit).offset(offset).all()
@@ -52,13 +52,13 @@ def read_all(limit: int, offset: int, db: Session) -> list[Tag]:
     return db.query(Tag).limit(limit).offset(offset).all()
 
 
-def update(id: int | Column, t: TagUpdate, db: Session) -> None:
+def update(id: int | sa.Column, t: TagUpdate, db: Session) -> None:
     db.query(Tag).filter(Tag.id == id).update(t.dict(exclude_unset=True))
 
     db.commit()
 
 
-def delete(id: int | Column, db: Session) -> None:
+def delete(id: int | sa.Column, db: Session) -> None:
     db.query(Tag).filter(Tag.id == id).delete()
 
     db.commit()

@@ -1,5 +1,4 @@
-from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
-from app.core.utils import MiscConflictErr, get_existing_campaign, get_existing_image
+from app.core import security, utils
 from app.data.crud import bookmark, campaign
 from app.data.crud.campaign import (
     Campaign,
@@ -23,14 +22,14 @@ router = APIRouter()
 async def create_campaign(
     c: CampaignCreate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Campaign:
     try:
         new_c = campaign.create(curr_u.id, c, db)
         _ = bookmark.create(curr_u.id, new_c.id, db)
 
     except IntegrityError:
-        raise MiscConflictErr
+        raise utils.MiscConflictErr
 
     return new_c
 
@@ -40,22 +39,22 @@ async def update_campaign(
     id: int,
     c: CampaignUpdate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Campaign | None:
-    existing_c = get_existing_campaign(id, db)
+    existing_c = utils.get_existing_campaign(id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     try:
         if c.cover_id is not None:
-            _ = get_existing_image(c.cover_id, db)
+            _ = utils.get_existing_image(c.cover_id, db)
 
         campaign.update(id, c, db)
         updated_c = campaign.read(id, db)
 
     except IntegrityError:
-        raise MiscConflictErr
+        raise utils.MiscConflictErr
 
     return updated_c
 
@@ -64,19 +63,19 @@ async def update_campaign(
 async def start_campaign(
     id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Campaign | None:
-    existing_c = get_existing_campaign(id, db)
+    existing_c = utils.get_existing_campaign(id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     try:
         campaign.update_state(id, State.STARTED, db)
         updated_c = campaign.read(id, db)
 
     except IntegrityError:
-        raise MiscConflictErr
+        raise utils.MiscConflictErr
 
     return updated_c
 
@@ -85,19 +84,19 @@ async def start_campaign(
 async def delete_campaign(
     id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> None:
-    existing_c = get_existing_campaign(id, db)
+    existing_c = utils.get_existing_campaign(id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     campaign.delete(id, db)
 
 
 @router.get("/campaigns/{id}", response_model=CampaignRead)
 async def read_campaign(id: int, db: Session = Depends(get_db)) -> Campaign:
-    existing_c = get_existing_campaign(id, db)
+    existing_c = utils.get_existing_campaign(id, db)
 
     return existing_c
 

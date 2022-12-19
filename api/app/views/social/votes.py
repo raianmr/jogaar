@@ -1,5 +1,4 @@
-from app.core.utils import get_existing_campaign, get_existing_reply
-from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
+from app.core import security, utils
 from app.data.crud import vote
 from app.data.crud.user import User
 from app.data.crud.vote import Vote, VoteRead
@@ -45,9 +44,9 @@ def get_existing_vote(u_id: int, r_id: int, db: Session) -> Vote:
 async def create_vote(
     r_id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Vote:
-    existing_r = get_existing_reply(r_id, db)
+    existing_r = utils.get_existing_reply(r_id, db)
 
     try:
         new_v = vote.create(curr_u.id, existing_r.id, db)
@@ -65,10 +64,10 @@ async def create_vote(
 async def delete_vote(
     r_id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> None:
     existing_v = get_existing_vote(curr_u.id, r_id, db)  # type: ignore
-    existing_r = get_existing_reply(existing_v.reply_id, db)  # type: ignore
+    existing_r = utils.get_existing_reply(existing_v.reply_id, db)  # type: ignore
 
     vote.delete_by_user_and_reply(curr_u.id, existing_r.id, db)
 

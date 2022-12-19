@@ -1,14 +1,4 @@
-from app.core.utils import (
-    MiscConflictErr,
-    get_existing_campaign,
-    has_crossed_deadline,
-)
-from app.core.security import (
-    get_current_admin_user,
-    get_current_super_user,
-    get_current_valid_user,
-    get_existing_user,
-)
+from app.core import security, utils
 from app.data.crud import campaign, report, user
 from app.data.crud.campaign import Campaign, CampaignRead, State
 from app.data.crud.report import ContentType, Report, ReportCreate, ReportRead
@@ -41,7 +31,7 @@ def change_campaign_state(
 ) -> None:
     if status:
         campaign.update_state(c.id, target, db)
-    elif has_crossed_deadline(c):
+    elif utils.has_crossed_deadline(c):
         campaign.update_state(c.id, State.ENDED, db)
     else:
         campaign.update_state(c.id, State.STARTED, db)
@@ -52,9 +42,9 @@ async def ban_user(
     id: int,
     status: bool,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_super_user),
+    curr_u: User = Depends(security.get_current_super_user),
 ) -> User | None:
-    existing_u = get_existing_user(id, db)
+    existing_u = security.get_existing_user(id, db)
 
     change_user_access(status, existing_u, Access.BANNED, db)
 
@@ -68,9 +58,9 @@ async def create_moderator(
     id: int,
     status: bool,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_admin_user),
+    curr_u: User = Depends(security.get_current_admin_user),
 ) -> User | None:
-    existing_u = get_existing_user(id, db)
+    existing_u = security.get_existing_user(id, db)
 
     change_user_access(status, existing_u, Access.MOD, db)
 
@@ -84,9 +74,9 @@ async def greenlight_campaign(
     id: int,
     status: bool,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_super_user),
+    curr_u: User = Depends(security.get_current_super_user),
 ) -> Campaign | None:
-    existing_c = get_existing_campaign(id, db)
+    existing_c = utils.get_existing_campaign(id, db)
 
     change_campaign_state(status, existing_c, State.GREENLIT, db)
 
@@ -102,9 +92,9 @@ async def lock_campaign(
     id: int,
     status: bool,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_super_user),
+    curr_u: User = Depends(security.get_current_super_user),
 ) -> Campaign | None:
-    existing_c = get_existing_campaign(id, db)
+    existing_c = utils.get_existing_campaign(id, db)
 
     change_campaign_state(status, existing_c, State.LOCKED, db)
 
@@ -119,13 +109,13 @@ async def lock_campaign(
 async def create_report(
     r: ReportCreate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Report:
     try:
         new_report = report.create(curr_u.id, r, db)
 
     except IntegrityError:
-        raise MiscConflictErr
+        raise utils.MiscConflictErr
 
     return new_report
 
@@ -134,7 +124,7 @@ async def create_report(
 async def read_report(
     id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_super_user),
+    curr_u: User = Depends(security.get_current_super_user),
 ) -> Report:
     existing_report = report.read(id, db)
     if existing_report is None:
@@ -148,7 +138,7 @@ async def read_reports(
     limit: int = 100,
     offset: int = 0,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_super_user),
+    curr_u: User = Depends(security.get_current_super_user),
 ) -> list[Report]:
     all_reports = report.read_all(limit, offset, db)
 

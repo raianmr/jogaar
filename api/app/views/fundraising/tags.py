@@ -1,5 +1,4 @@
-from app.core.utils import get_existing_campaign
-from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
+from app.core import security, utils
 from app.data.crud import tag
 from app.data.crud.tag import Tag, TagCreate, TagRead, TagUpdate
 from app.data.crud.user import User
@@ -44,12 +43,12 @@ async def create_tag(
     c_id: int,
     t: TagCreate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Tag:
-    existing_c = get_existing_campaign(c_id, db)
+    existing_c = utils.get_existing_campaign(c_id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     try:
         new_t = tag.create(c_id, t, db)
@@ -65,13 +64,13 @@ async def update_tag(
     t_id: int,
     t: TagUpdate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Tag | None:
     existing_t = get_existing_tag(t_id, db)
-    existing_c = get_existing_campaign(existing_t.campaign_id, db)
+    existing_c = utils.get_existing_campaign(existing_t.campaign_id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     try:
         tag.update(t_id, t, db)
@@ -90,13 +89,13 @@ async def update_tag(
 async def delete_tag(
     t_id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> None:
     existing_t = get_existing_tag(t_id, db)
-    existing_c = get_existing_campaign(existing_t.campaign_id, db)
+    existing_c = utils.get_existing_campaign(existing_t.campaign_id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     tag.delete(t_id, db)
 

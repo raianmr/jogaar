@@ -1,8 +1,8 @@
 from enum import Enum
 
+import sqlalchemy as sa
 from app.data.base import Base, BaseRead
 from pydantic import BaseModel
-from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Session
 
 
@@ -13,16 +13,18 @@ class ContentType(str, Enum):
 
 
 class Report(Base):
-    reporter_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    reporter_id = sa.Column(
+        sa.Integer, sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
 
-    description = Column(String, nullable=False)
+    description = sa.Column(sa.String, nullable=False)
 
-    content_id = Column(Integer, nullable=False)
-    content_type = Column(String, server_default=ContentType.CAMPAIGN, nullable=False)
+    content_id = sa.Column(sa.Integer, nullable=False)
+    content_type = sa.Column(
+        sa.String, server_default=ContentType.CAMPAIGN, nullable=False
+    )
 
-    __table_args__ = tuple(UniqueConstraint(reporter_id, content_type, content_id))
+    __table_args__ = tuple(sa.UniqueConstraint(reporter_id, content_type, content_id))
 
 
 class ReportCreate(BaseModel):
@@ -41,7 +43,7 @@ class ReportRead(BaseRead):
     content_type: ContentType
 
 
-def create(_reporter_id: int | Column, r: ReportCreate, db: Session) -> Report:
+def create(_reporter_id: int | sa.Column, r: ReportCreate, db: Session) -> Report:
     new_report = Report(reporter_id=_reporter_id, **r.dict())  # type: ignore
     db.add(new_report)
 
@@ -51,7 +53,7 @@ def create(_reporter_id: int | Column, r: ReportCreate, db: Session) -> Report:
     return new_report
 
 
-def read(id: int | Column, db: Session) -> Report | None:
+def read(id: int | sa.Column, db: Session) -> Report | None:
     return db.query(Report).filter(Report.id == id).first()
 
 

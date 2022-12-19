@@ -1,10 +1,4 @@
-from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
-from app.core.utils import (
-    MiscConflictErr,
-    get_existing_campaign,
-    get_existing_image,
-    get_existing_update,
-)
+from app.core import security, utils
 from app.data.crud import update
 from app.data.crud.update import Update, UpdateCreate, UpdateRead, UpdateUpdate
 from app.data.crud.user import User
@@ -25,18 +19,18 @@ async def create_update(
     c_id: int,
     u: UpdateCreate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Update:
-    existing_c = get_existing_campaign(c_id, db)
+    existing_c = utils.get_existing_campaign(c_id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     try:
         new_u = update.create(c_id, u, db)
 
     except IntegrityError:
-        raise MiscConflictErr
+        raise utils.MiscConflictErr
 
     return new_u
 
@@ -46,23 +40,23 @@ async def update_update(
     up_id: int,
     u: UpdateUpdate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Update | None:
-    existing_up = get_existing_update(up_id, db)
-    existing_c = get_existing_campaign(existing_up.campaign_id, db)
+    existing_up = utils.get_existing_update(up_id, db)
+    existing_c = utils.get_existing_campaign(existing_up.campaign_id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     try:
         if u.picture_id is not None:
-            _ = get_existing_image(u.picture_id, db)
+            _ = utils.get_existing_image(u.picture_id, db)
 
         update.update(existing_up.id, u, db)
         updated_up = update.read(existing_up.id, db)
 
     except IntegrityError:
-        raise MiscConflictErr
+        raise utils.MiscConflictErr
 
     return updated_up
 
@@ -74,13 +68,13 @@ async def update_update(
 async def delete_update(
     up_id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> None:
-    existing_up = get_existing_update(up_id, db)
-    existing_c = get_existing_campaign(existing_up.campaign_id, db)
+    existing_up = utils.get_existing_update(up_id, db)
+    existing_c = utils.get_existing_campaign(existing_up.campaign_id, db)
 
-    if not has_access_over(existing_c, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_c, curr_u):
+        raise security.NotAllowedErr
 
     update.delete(up_id, db)
 
@@ -90,7 +84,7 @@ async def read_update(
     up_id: int,
     db: Session = Depends(get_db),
 ) -> Update:
-    existing_up = get_existing_update(up_id, db)
+    existing_up = utils.get_existing_update(up_id, db)
 
     return existing_up
 

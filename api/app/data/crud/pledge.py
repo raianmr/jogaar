@@ -1,19 +1,19 @@
+import sqlalchemy as sa
 from app.data.base import Base, BaseRead
 from pydantic import BaseModel
-from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Session
 
 
 class Pledge(Base):
-    pledger_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    pledger_id = sa.Column(
+        sa.Integer, sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    campaign_id = Column(
-        Integer, ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
+    campaign_id = sa.Column(
+        sa.Integer, sa.ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
     )
-    amount = Column(Integer, nullable=False)
+    amount = sa.Column(sa.Integer, nullable=False)
 
-    __table_args__ = tuple(UniqueConstraint(campaign_id, pledger_id))
+    __table_args__ = tuple(sa.UniqueConstraint(campaign_id, pledger_id))
 
 
 class PledgeCreate(BaseModel):
@@ -31,8 +31,8 @@ class PledgeUpdate(BaseModel):
 
 
 def create(
-    u_id: int | Column,
-    c_id: int | Column,
+    u_id: int | sa.Column,
+    c_id: int | sa.Column,
     p: PledgeCreate,
     db: Session,
 ) -> Pledge:
@@ -45,12 +45,12 @@ def create(
     return new_p
 
 
-def read(id: int | Column, db: Session) -> Pledge | None:
+def read(id: int | sa.Column, db: Session) -> Pledge | None:
     return db.query(Pledge).filter(Pledge.id == id).first()
 
 
 def read_by_user_and_campaign(
-    u_id: int | Column, c_id: int | Column, db: Session
+    u_id: int | sa.Column, c_id: int | sa.Column, db: Session
 ) -> Pledge | None:
     return (
         db.query(Pledge)
@@ -60,7 +60,7 @@ def read_by_user_and_campaign(
 
 
 def read_all_by_user(
-    u_id: int | Column, limit: int, offset: int, db: Session
+    u_id: int | sa.Column, limit: int, offset: int, db: Session
 ) -> list[Pledge]:
     return (
         db.query(Pledge)
@@ -72,7 +72,7 @@ def read_all_by_user(
 
 
 def read_all_by_campaign(
-    c_id: int | Column, limit: int, offset: int, db: Session
+    c_id: int | sa.Column, limit: int, offset: int, db: Session
 ) -> list[Pledge]:
     return (
         db.query(Pledge)
@@ -87,20 +87,20 @@ def read_all(limit: int, offset: int, db: Session) -> list[Pledge]:
     return db.query(Pledge).limit(limit).offset(offset).all()
 
 
-def update(id: int | Column, p: PledgeUpdate, db: Session) -> None:
+def update(id: int | sa.Column, p: PledgeUpdate, db: Session) -> None:
     db.query(Pledge).filter(Pledge.id == id).update(p.dict(exclude_unset=True))
 
     db.commit()
 
 
-def delete(id: int | Column, db: Session) -> None:
+def delete(id: int | sa.Column, db: Session) -> None:
     db.query(Pledge).filter(Pledge.id == id).delete()
 
     db.commit()
 
 
 def delete_by_user_and_campaign(
-    u_id: int | Column, c_id: int | Column, db: Session
+    u_id: int | sa.Column, c_id: int | sa.Column, db: Session
 ) -> None:
     db.query(Pledge).filter(
         Pledge.pledger_id == u_id, Pledge.campaign_id == c_id

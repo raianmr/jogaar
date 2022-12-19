@@ -1,15 +1,9 @@
-from app.core.utils import (
-    MiscConflictErr,
-    get_existing_campaign,
-    get_existing_reply,
-    get_existing_update,
-)
-from app.core.security import NotAllowedErr, get_current_valid_user, has_access_over
+from app.core import security, utils
 from app.data.crud import reply
 from app.data.crud.reply import Reply, ReplyCreate, ReplyRead, ReplyUpdate
 from app.data.crud.user import User
 from app.data.session import get_db
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -25,15 +19,15 @@ async def create_reply(
     up_id: int,
     r: ReplyCreate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Reply:
-    existing_up = get_existing_update(up_id, db)
+    existing_up = utils.get_existing_update(up_id, db)
 
     try:
         new_r = reply.create(curr_u.id, existing_up.id, r, db)
 
     except IntegrityError:
-        raise MiscConflictErr
+        raise utils.MiscConflictErr
 
     return new_r
 
@@ -43,19 +37,19 @@ async def update_reply(
     r_id: int,
     r: ReplyUpdate,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> Reply | None:
-    existing_r = get_existing_reply(r_id, db)
+    existing_r = utils.get_existing_reply(r_id, db)
 
-    if not has_access_over(existing_r, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_r, curr_u):
+        raise security.NotAllowedErr
 
     try:
         reply.update(existing_r.id, r, db)
         updated_r = reply.read(existing_r.id, db)
 
     except IntegrityError:
-        raise MiscConflictErr
+        raise utils.MiscConflictErr
 
     return updated_r
 
@@ -67,12 +61,12 @@ async def update_reply(
 async def delete_reply(
     r_id: int,
     db: Session = Depends(get_db),
-    curr_u: User = Depends(get_current_valid_user),
+    curr_u: User = Depends(security.get_current_valid_user),
 ) -> None:
-    existing_r = get_existing_reply(r_id, db)
+    existing_r = utils.get_existing_reply(r_id, db)
 
-    if not has_access_over(existing_r, curr_u):
-        raise NotAllowedErr
+    if not security.has_access_over(existing_r, curr_u):
+        raise security.NotAllowedErr
 
     reply.delete(r_id, db)
 
@@ -82,7 +76,7 @@ async def read_reply(
     r_id: int,
     db: Session = Depends(get_db),
 ) -> Reply:
-    existing_r = get_existing_reply(r_id, db)
+    existing_r = utils.get_existing_reply(r_id, db)
 
     return existing_r
 
