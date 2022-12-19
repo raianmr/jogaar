@@ -27,7 +27,7 @@ class PledgeRead(BaseRead):
 
 
 class PledgeUpdate(BaseModel):
-    amount: int | None
+    amount: int
 
 
 def create(

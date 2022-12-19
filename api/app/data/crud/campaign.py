@@ -165,6 +165,12 @@ def update(id: int | sa.Column, c: CampaignUpdate, db: Session) -> None:
     db.commit()
 
 
+def update_pledged(c_id: int | sa.Column, amount: int | sa.Column, db: Session):
+    db.query(Campaign).filter(Campaign.id == c_id).update({Campaign.pledged: amount})
+
+    db.commit()
+
+
 def update_state(id: int | sa.Column, s: State, db: Session):
     db.query(Campaign).filter(Campaign.id == id).update({Campaign.current_state: s})
 
@@ -175,3 +181,35 @@ def delete(id: int | sa.Column, db: Session) -> None:
     db.query(Campaign).filter(Campaign.id == id).delete()
 
     db.commit()
+
+
+def greenlit_count(db: Session) -> int:
+    return db.query(Campaign).filter(Campaign.current_state == State.GREENLIT).count()
+
+
+def successful_campaigner_count(db: Session):
+    return (
+        db.query(Campaign)
+        .filter(Campaign.current_state == State.GREENLIT)
+        .distinct(Campaign.campaigner_id)
+        .count()
+    )
+
+
+def successful_pledger_count(db: Session) -> int:
+    return (
+        db.query(Campaign)
+        .join(Pledge, Pledge.campaign_id == Campaign.id)
+        .filter(Campaign.current_state == State.GREENLIT)
+        .distinct(Pledge.pledger_id)
+        .count()
+    )
+
+
+def successfully_raised(db: Session) -> int:
+    return (
+        db.query(Campaign)
+        .filter(Campaign.current_state == State.GREENLIT)
+        .with_entities(sa.func.sum(Campaign.pledged))
+        .scalar()
+    )

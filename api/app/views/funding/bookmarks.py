@@ -20,22 +20,6 @@ class UserAndCampaignConflictErr(HTTPException):
         )
 
 
-class BookmarkNotFoundErr(HTTPException):
-    def __init__(self) -> None:
-        super().__init__(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="bookmark was not found",
-        )
-
-
-def get_existing_bookmark(u_id: int, c_id: int, db: Session) -> Bookmark:
-    existing_b = bookmark.read_by_user_and_campaign(u_id, c_id, db)
-    if existing_b is None:
-        raise BookmarkNotFoundErr
-
-    return existing_b
-
-
 @router.post(
     "/campaigns/{c_id}/bookmarks",
     status_code=status.HTTP_201_CREATED,
@@ -66,7 +50,7 @@ async def delete_bookmark(
     db: Session = Depends(get_db),
     curr_u: User = Depends(security.get_current_valid_user),
 ) -> None:
-    existing_b = get_existing_bookmark(curr_u.id, c_id, db)  # type: ignore
+    existing_b = utils.get_existing_bookmark(curr_u.id, c_id, db)  # type: ignore
     existing_c = utils.get_existing_campaign(existing_b.campaign_id, db)
 
     bookmark.delete_by_user_and_campaign(curr_u.id, existing_c.id, db)

@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta, timezone
 
-from app.core.security import NotAllowedErr, get_current_valid_user, is_super
 from app.data.crud import bookmark, campaign, image, reply, update
 from app.data.crud.campaign import Campaign
 from app.data.crud.reply import Reply
@@ -29,30 +28,6 @@ class CampaignNotFoundErr(HTTPException):
         )
 
 
-class UpdateNotFoundErr(HTTPException):
-    def __init__(self) -> None:
-        super().__init__(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="update was not found",
-        )
-
-
-class ReplyNotFoundErr(HTTPException):
-    def __init__(self) -> None:
-        super().__init__(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="reply was not found",
-        )
-
-
-class ImageNotFoundErr(HTTPException):
-    def __init__(self) -> None:
-        super().__init__(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="image was not found",
-        )
-
-
 def get_existing_campaign(campaign_id: int | Column, db: Session) -> Campaign:
     existing_c = campaign.read(campaign_id, db)
     if existing_c is None:
@@ -70,6 +45,14 @@ def campaign_with_meta(existing_c: Campaign, existing_u: User, db: Session):
     }
 
 
+class UpdateNotFoundErr(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="update was not found",
+        )
+
+
 def get_existing_update(update_id: int, db: Session) -> Update:
     existing_u = update.read(update_id, db)
     if existing_u is None:
@@ -78,12 +61,28 @@ def get_existing_update(update_id: int, db: Session) -> Update:
     return existing_u
 
 
+class ReplyNotFoundErr(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="reply was not found",
+        )
+
+
 def get_existing_reply(update_id: int, db: Session) -> Reply:
     existing_r = reply.read(update_id, db)
     if existing_r is None:
         raise ReplyNotFoundErr
 
     return existing_r
+
+
+class ImageNotFoundErr(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="image was not found",
+        )
 
 
 def get_existing_image(img_id: int, db: Session) -> image.Image:
@@ -99,6 +98,22 @@ def get_existing_image(img_id: int, db: Session) -> image.Image:
         raise ImageNotFoundErr
 
     return existing_img
+
+
+class BookmarkNotFoundErr(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="bookmark was not found",
+        )
+
+
+def get_existing_bookmark(u_id: int, c_id: int, db: Session) -> bookmark.Bookmark:
+    existing_b = bookmark.read_by_user_and_campaign(u_id, c_id, db)
+    if existing_b is None:
+        raise BookmarkNotFoundErr
+
+    return existing_b
 
 
 def has_crossed_deadline(c: Campaign) -> bool:
