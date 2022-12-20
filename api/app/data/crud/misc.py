@@ -82,16 +82,19 @@ def pledged_campaigns(
     )
 
 
-# def updates_for_bookmarked(
-#     u_id: int | sa.Column, limit: int, offset: int, db: Session
-# ) -> list[Update]:
-#     return (
-#         db.query(Update)
-#         .filter(Update.campaign_id == u_id)
-#         .limit(limit)
-#         .offset(offset)
-#         .all()
-#     )
+def updates_for_bookmarked(
+    u_id: int | sa.Column, limit: int, offset: int, db: Session
+) -> list[Update]:
+    s = (
+        sa.select(Update)
+        .join(Bookmark, Update.campaign_id == Bookmark.campaign_id)
+        .where(Bookmark.user_id == u_id)
+        .order_by(sa.desc(Update.created_at))
+        .limit(limit)
+        .offset(offset)
+    )
+
+    return db.execute(s).scalars().all()
 
 
 def searched_campaigns(
