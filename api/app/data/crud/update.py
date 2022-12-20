@@ -1,6 +1,6 @@
+import sqlalchemy as sa
 from app.data.base import Base, BaseRead
 from pydantic import BaseModel
-import sqlalchemy as sa
 from sqlalchemy.orm import Session
 
 
@@ -61,7 +61,6 @@ def read_all_by_campaign(
         .offset(offset)
         .all()
     )
-
 
 def read_all(limit: int, offset: int, db: Session) -> list[Update]:
     return db.query(Update).limit(limit).offset(offset).all()

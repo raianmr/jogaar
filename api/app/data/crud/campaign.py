@@ -3,9 +3,6 @@ from enum import Enum
 
 import sqlalchemy as sa
 from app.data.base import Base, BaseRead
-from app.data.crud.bookmark import Bookmark
-from app.data.crud.pledge import Pledge
-from app.data.crud.tag import Tag
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -101,60 +98,6 @@ def read_all_by_campaigner(
     )
 
 
-def read_all_bookmarked(
-    u_id: int | sa.Column, limit: int, offset: int, db: Session
-) -> list[Campaign]:
-    return (
-        db.query(Campaign)
-        .join(Bookmark, Bookmark.campaign_id == Campaign.id)
-        .filter(Bookmark.user_id == u_id)
-        .limit(limit)
-        .offset(offset)
-        .all()
-    )
-
-
-def read_all_pledged(
-    u_id: int | sa.Column, limit: int, offset: int, db: Session
-) -> list[Campaign]:
-    return (
-        db.query(Campaign)
-        .join(Pledge, Pledge.campaign_id == Campaign.id)
-        .filter(Pledge.pledger_id == u_id)
-        .limit(limit)
-        .offset(offset)
-        .all()
-    )
-
-
-def read_all_by_query(
-    title: str, tags: list[str], limit: int, offset: int, db: Session
-) -> list[Campaign]:
-    # select campaigns.* from campaigns inner join tags
-    # ON tags.campaign_id = campaigns.id where tags.name
-    # in (_, _) group by campaigns.id having count(campaigns.id) = 2;
-    # http://web.archive.org/web/20150813211028/http://tagging.pui.ch/post/37027745720/tags-database-schemas
-
-    q = db.query(Campaign)
-
-    if len(tags) != 0:
-        q = (
-            q.join(Tag, Tag.campaign_id == Campaign.id)
-            .filter(Tag.name.in_(tags))
-            .group_by(Campaign.id)
-            .having(sa.func.count(Campaign.id) == len(tags))
-        )
-
-    # https://web.archive.org/web/20170609041347/http://chairnerd.seatgeek.com/fuzzywuzzy-fuzzy-string-matching-in-python/
-    if title != "":
-        # TODO try elastic search next time
-        q = q.order_by(sa.desc(sa.func.word_similarity(Campaign.title, title)))
-
-    all_c = q.limit(limit).offset(offset).all()
-
-    return all_c
-
-
 def read_all(limit: int, offset: int, db: Session) -> list[Campaign]:
     return db.query(Campaign).limit(limit).offset(offset).all()
 
@@ -181,35 +124,3 @@ def delete(id: int | sa.Column, db: Session) -> None:
     db.query(Campaign).filter(Campaign.id == id).delete()
 
     db.commit()
-
-
-def greenlit_count(db: Session) -> int:
-    return db.query(Campaign).filter(Campaign.current_state == State.GREENLIT).count()
-
-
-def successful_campaigner_count(db: Session):
-    return (
-        db.query(Campaign)
-        .filter(Campaign.current_state == State.GREENLIT)
-        .distinct(Campaign.campaigner_id)
-        .count()
-    )
-
-
-def successful_pledger_count(db: Session) -> int:
-    return (
-        db.query(Campaign)
-        .join(Pledge, Pledge.campaign_id == Campaign.id)
-        .filter(Campaign.current_state == State.GREENLIT)
-        .distinct(Pledge.pledger_id)
-        .count()
-    )
-
-
-def successfully_raised(db: Session) -> int:
-    return (
-        db.query(Campaign)
-        .filter(Campaign.current_state == State.GREENLIT)
-        .with_entities(sa.func.sum(Campaign.pledged))
-        .scalar()
-    )

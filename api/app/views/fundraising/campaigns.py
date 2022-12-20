@@ -1,5 +1,5 @@
 from app.core import security, utils
-from app.data.crud import bookmark, campaign
+from app.data.crud import bookmark, campaign, misc
 from app.data.crud.campaign import (
     Campaign,
     CampaignCreate,
@@ -117,7 +117,7 @@ async def read_bookmarked_campaigns(
     offset: int = 0,
     db: Session = Depends(get_db),
 ) -> list[Campaign]:
-    all_c = campaign.read_all_bookmarked(u_id, limit, offset, db)
+    all_c = misc.bookmarked_campaigns(u_id, limit, offset, db)
 
     return all_c
 
@@ -129,7 +129,7 @@ async def read_pledged_campaigns(
     offset: int = 0,
     db: Session = Depends(get_db),
 ) -> list[Campaign]:
-    all_c = campaign.read_all_pledged(u_id, limit, offset, db)
+    all_c = misc.pledged_campaigns(u_id, limit, offset, db)
 
     return all_c
 

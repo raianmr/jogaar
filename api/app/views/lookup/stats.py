@@ -1,4 +1,4 @@
-from app.data.crud import campaign
+from app.data.crud import misc
 from app.data.session import get_db
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -18,10 +18,11 @@ async def get_stats(
 ):
     return {
         "successes": {
-            "campaigns": campaign.greenlit_count(db),
-            "campaigners": campaign.successful_campaigner_count(db),
-            "pledgers": campaign.successful_pledger_count(db),
-            "raised": campaign.successfully_raised(db),
+            "campaigns": misc.greenlit_count(db),
+            "campaigners": misc.successful_campaigner_count(db),
+            "pledgers": misc.successful_pledger_count(db),
+            "raised": misc.successfully_raised(db),
         },
         "failures": {},
+        "technical": {},
     }
