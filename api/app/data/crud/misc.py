@@ -43,6 +43,53 @@ def successfully_raised(db: Session) -> int:
     )
 
 
+# - take the tags the user is interested in based on their bookmarked campaigns
+# - sort campaigns by number of distinct tags that match this criteria
+#   [this is preferable to just sorting based on user's commonly bookmarked
+#   tags because that might result in a lack of diversity in the campaigns
+#   recommended -- which should be its own opt-in feature imo. but for now,
+#   catalogue/searching should do just fine to tackle such use cases]
+
+# select campaigns.*
+# from campaigns left join tags
+# on tags.campaign_id = campaigns.id
+# group by campaigns.id
+# order by count(
+#   tags.name in (
+#     select tags.name
+#     from tags join bookmarks
+#     on bookmarks.campaign_id = tags.campaign_id
+#     where bookmarks.user_id = _
+#     group by tags.name
+#   )
+# ) desc;
+def recommended_campaigns(
+    u_id: int | sa.Column, limit: int, offset: int, db: Session
+) -> list[Campaign]:
+    fav_tags_query = (
+        sa.select(Tag.name)
+        .join(Bookmark, Tag.campaign_id == Bookmark.campaign_id)
+        .where(Bookmark.user_id == u_id)
+        .group_by(Tag.name)
+    )
+
+    # TODO exclude campaigns that are pledged to by the user
+    # select campaigns.*
+    # from campaigns left join pledges
+    # on pledges.campaign_id = campaigns.id
+    # ...
+
+    recommended_query = (
+        sa.select(Campaign)
+        .join(Tag, Tag.campaign_id == Campaign.id, isouter=True)
+        .where(Campaign.current_state == State.STARTED, Campaign.campaigner_id != u_id)
+        .group_by(Campaign.id)
+        .order_by(sa.desc(sa.func.count(Tag.name.in_(fav_tags_query))))
+    )
+
+    return db.execute(recommended_query.limit(limit).offset(offset)).scalars().all()
+
+
 featured_query: Final = (
     sa.select(Campaign)
     .join(Pledge, Pledge.campaign_id == Campaign.id, isouter=True)

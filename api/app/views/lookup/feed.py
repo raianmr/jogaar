@@ -16,8 +16,9 @@ router = APIRouter()
 # + news feed DONE
 #   - updates from bookmarked campaigns
 #   - sort by creation time
-# + based on your interests
+# + recommended campaigns
 #   - sort featured campaigns by user's most bookmarked tags
+#   - exclude already bookmarked (and pledged in turn)
 # + recently viewed
 #   - based on GET on /campaigns endpoints
 #   - custom lru cache or redis?
@@ -32,6 +33,19 @@ async def get_featured(
     featured = misc.featured_campaigns(limit, offset, db)
 
     return featured
+
+
+@router.get("/recommended", response_model=list[CampaignRead])
+# @router.get("/recommended")
+async def get_recommended(
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+    curr_u: User = Depends(security.get_current_valid_user),
+) -> list[Campaign]:
+    recommended = misc.recommended_campaigns(curr_u.id, limit, offset, db)
+
+    return recommended
 
 
 @router.get("/news", response_model=list[UpdateRead])
