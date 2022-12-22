@@ -65,6 +65,16 @@ def create(u: UserCreate, db: Session) -> User:
     return new_u
 
 
+def create_with_access(u: UserCreate, a: Access, db: Session) -> User:
+    new_u = User(**u.dict(), access_level=a)  # type: ignore
+    db.add(new_u)
+
+    db.commit()
+    db.refresh(new_u)
+
+    return new_u
+
+
 def read(id: int | sa.Column, db: Session) -> User | None:
     return db.query(User).filter(User.id == id).first()
 

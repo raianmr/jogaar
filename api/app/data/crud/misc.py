@@ -73,6 +73,7 @@ def recommended_campaigns(
         .group_by(Tag.name)
     )
 
+    # TODO add featured camapigns as sorting fallback
     # TODO exclude campaigns that are pledged to by the user
     # select campaigns.*
     # from campaigns left join pledges

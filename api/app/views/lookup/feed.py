@@ -36,7 +36,6 @@ async def get_featured(
 
 
 @router.get("/recommended", response_model=list[CampaignRead])
-# @router.get("/recommended")
 async def get_recommended(
     limit: int = 100,
     offset: int = 0,
