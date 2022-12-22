@@ -10,21 +10,21 @@ from sqlalchemy.orm import Session
 router = APIRouter()
 
 # feed should contain:
-# + featured campaigns DONE
+# + featured campaigns [done]
 #   - sort by number of distinct pledgers
 #   - only show ongoing campaigns
-# + news feed DONE
+# + news feed [done]
 #   - updates from bookmarked campaigns
 #   - sort by creation time
-# + recommended campaigns
+# + recommended campaigns [partially done]
 #   - sort featured campaigns by user's most bookmarked tags
 #   - exclude already bookmarked (and pledged in turn)
-# + recently viewed
+# + recently viewed [TODO]
 #   - based on GET on /campaigns endpoints
 #   - custom lru cache or redis?
 
 
-@router.get("/featured", response_model=list[CampaignRead])
+@router.get("/feed/featured", response_model=list[CampaignRead])
 async def get_featured(
     limit: int = 100,
     offset: int = 0,
@@ -35,7 +35,7 @@ async def get_featured(
     return featured
 
 
-@router.get("/recommended", response_model=list[CampaignRead])
+@router.get("/feed/recommended", response_model=list[CampaignRead])
 async def get_recommended(
     limit: int = 100,
     offset: int = 0,
@@ -47,7 +47,7 @@ async def get_recommended(
     return recommended
 
 
-@router.get("/news", response_model=list[UpdateRead])
+@router.get("/feed/news", response_model=list[UpdateRead])
 async def get_news(
     limit: int = 100,
     offset: int = 0,

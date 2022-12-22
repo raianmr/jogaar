@@ -1,13 +1,13 @@
 from typing import Final
 
 import sqlalchemy as sa
-from app.data.base import Base, BaseRead
 from app.data.crud.bookmark import Bookmark
 from app.data.crud.campaign import Campaign, State
 from app.data.crud.pledge import Pledge
+from app.data.crud.reply import Reply
 from app.data.crud.tag import Tag
 from app.data.crud.update import Update
-from pydantic import BaseModel
+from app.data.crud.vote import Vote
 from sqlalchemy.orm import Session
 
 
@@ -171,3 +171,33 @@ def searched_campaigns(
     all_c = q.limit(limit).offset(offset).all()
 
     return all_c
+
+
+def reply_alerts(
+    u_id: int | sa.Column, limit: int, offset: int, db: Session
+) -> list[Reply]:
+    s = (
+        sa.select(Reply)
+        .join(Update, Update.id == Reply.update_id)
+        .where(Update.user_id == u_id)
+        .order_by(sa.desc(Reply.created_at))
+        .limit(limit)
+        .offset(offset)
+    )
+
+    return db.execute(s).scalars().all()
+
+
+def vote_alerts(
+    u_id: int | sa.Column, limit: int, offset: int, db: Session
+) -> list[Vote]:
+    s = (
+        sa.select(Vote)
+        .join(Reply, Reply.id == Vote.reply_id)
+        .where(Reply.user_id == u_id)
+        .order_by(sa.desc(Vote.created_at))
+        .limit(limit)
+        .offset(offset)
+    )
+
+    return db.execute(s).scalars().all()

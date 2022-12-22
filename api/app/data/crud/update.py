@@ -5,6 +5,9 @@ from sqlalchemy.orm import Session
 
 
 class Update(Base):
+    user_id = sa.Column(
+        sa.Integer, sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
     campaign_id = sa.Column(
         sa.Integer, sa.ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False
     )
@@ -22,6 +25,7 @@ class UpdateCreate(BaseModel):
 
 
 class UpdateRead(BaseRead):
+    user_id: int
     campaign_id: int
 
     title: str
@@ -61,6 +65,7 @@ def read_all_by_campaign(
         .offset(offset)
         .all()
     )
+
 
 def read_all(limit: int, offset: int, db: Session) -> list[Update]:
     return db.query(Update).limit(limit).offset(offset).all()
