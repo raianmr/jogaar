@@ -68,7 +68,7 @@ def read_all(limit: int, offset: int, db: Session) -> list[Reply]:
 
 def update(id: int | sa.Column, r: ReplyUpdate, db: Session) -> None:
     db.query(Reply).filter(Reply.id == id).update(
-        {"edited": True, **r.dict(exclude_unset=True)}
+        {Reply.edited: True, **r.dict(exclude_unset=True)}
     )
 
     db.commit()

@@ -41,8 +41,10 @@ class UpdateUpdate(BaseModel):
     picture_id: int | None
 
 
-def create(c_id: int | sa.Column, up: UpdateCreate, db: Session) -> Update:
-    new_up = Update(campaign_id=c_id, **up.dict())  # type: ignore
+def create(
+    u_id: int | sa.Column, c_id: int | sa.Column, up: UpdateCreate, db: Session
+) -> Update:
+    new_up = Update(user_id=u_id, campaign_id=c_id, **up.dict())  # type: ignore
     db.add(new_up)
 
     db.commit()

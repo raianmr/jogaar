@@ -172,6 +172,7 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
+        sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column("campaign_id", sa.Integer(), nullable=False),
         sa.Column("title", sa.String(), nullable=False),
         sa.Column("content", sa.String(), nullable=False),

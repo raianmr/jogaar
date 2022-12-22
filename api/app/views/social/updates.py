@@ -27,7 +27,7 @@ async def create_update(
         raise security.NotAllowedErr
 
     try:
-        new_u = update.create(c_id, u, db)
+        new_u = update.create(curr_u.id, existing_c.id, u, db)
 
     except IntegrityError:
         raise utils.MiscConflictErr
