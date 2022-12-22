@@ -5,8 +5,7 @@ from app.data.crud.campaign import Campaign
 from app.data.crud.reply import Reply
 from app.data.crud.update import Update
 from app.data.crud.user import User
-from app.data.session import get_db
-from fastapi import Depends, HTTPException, Path, status
+from fastapi import HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import Column
 from sqlalchemy.orm import Session

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from functools import singledispatch
-from typing import Callable
+from typing import Callable, Final
 
 from app.core.config import env
 from app.data.crud import campaign, image, reply, user
@@ -213,6 +213,6 @@ class AuthorizedUser:
         return curr_u
 
 
-get_current_valid_user = AuthorizedUser(criterion=is_valid)
-get_current_super_user = AuthorizedUser(criterion=is_super)
-get_current_admin_user = AuthorizedUser(criterion=is_admin)
+get_current_valid_user: Final = AuthorizedUser(criterion=is_valid)
+get_current_super_user: Final = AuthorizedUser(criterion=is_super)
+get_current_admin_user: Final = AuthorizedUser(criterion=is_admin)

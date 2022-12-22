@@ -1,4 +1,4 @@
-import logging
+from typing import Final
 
 from pydantic import BaseSettings, EmailStr, ValidationError
 
@@ -27,7 +27,7 @@ class Settings(BaseSettings):
 
 
 try:
-    env = Settings()  # type: ignore
+    env: Final = Settings()  # type: ignore
 except ValidationError as err:
     print("env variables unset, set those and restart: \n", err)
     exit()

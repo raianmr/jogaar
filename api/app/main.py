@@ -1,11 +1,10 @@
-from contextlib import contextmanager
 from pathlib import Path
 
 import uvicorn
 from app.core.config import env
 from app.core.security import hash_password
 from app.data.crud import user
-from app.data.session import get_db
+from app.data.session import get_db_ctx
 from app.views import auth, funding, fundraising, lookup, social
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -55,11 +54,11 @@ first_admin_data = user.UserCreate(
     password=hash_password(env.ADMIN_PASS),
 )
 
-with contextmanager(get_db)() as db:
+with get_db_ctx() as db:
     existing_u = user.read_by_email(env.ADMIN_MAIL, db)
     if existing_u is None:
         user.create_with_access(first_admin_data, user.Access.ADMIN, db)
-    else:
+    elif existing_u.access_level != user.Access.ADMIN:
         user.update_access(existing_u.id, user.Access.ADMIN, db)
 
 

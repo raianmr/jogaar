@@ -1,4 +1,5 @@
-from typing import Generator
+from contextlib import contextmanager
+from typing import Final, Generator
 
 from app.core.config import env
 from sqlalchemy import create_engine
@@ -16,3 +17,6 @@ def get_db() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
+
+
+get_db_ctx: Final = contextmanager(get_db)
