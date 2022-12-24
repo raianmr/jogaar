@@ -52,3 +52,14 @@ export type Report = {
   content_id: number
   content_type: Reportable
 }
+
+export type TokenData = {
+  access_token: string
+  token_type: string
+  access_level: Access
+}
+
+export type LoginData = {
+  username: string
+  password: string
+}

@@ -7,6 +7,7 @@ from app.data.crud.pledge import Pledge
 from app.data.crud.reply import Reply
 from app.data.crud.tag import Tag
 from app.data.crud.update import Update
+from app.data.crud.user import Access, User
 from app.data.crud.vote import Vote
 from sqlalchemy.orm import Session
 
@@ -201,3 +202,13 @@ def vote_alerts(
     )
 
     return db.execute(s).scalars().all()
+
+
+def read_all_modmins(limit: int, offset: int, db: Session) -> list[User]:
+    return (
+        db.query(User)
+        .filter(User.access_level.in_([Access.MOD, Access.ADMIN]))
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )

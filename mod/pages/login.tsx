@@ -1,7 +1,7 @@
 import { useRouter } from "next/router"
-import { FormEvent, useState } from "react"
+import { FormEvent, useEffect, useState } from "react"
 import { tokenDataFetcher } from "../data/fetching"
-import { setToken } from "../data/store"
+import { getToken, setToken } from "../data/store"
 
 // TODO https://hasura.io/blog/best-practices-of-using-jwt-with-graphql/
 
@@ -12,6 +12,14 @@ export default function Login() {
   const [password, setPassword] = useState("")
   const [errorMsg, setErrorMsg] = useState("")
 
+  useEffect(() => {
+    const token = getToken()
+
+    if (token) {
+      router.push("/modmins")
+    }
+  })
+
   const submitHandler = async (e: FormEvent) => {
     e.preventDefault()
 
@@ -21,8 +29,7 @@ export default function Login() {
       setErrorMsg("")
       setToken(data)
 
-      router.push("/dashboard")
-      // console.log(data)
+      router.push("/modmins")
     } catch (e: any) {
       setErrorMsg(e.message)
     }

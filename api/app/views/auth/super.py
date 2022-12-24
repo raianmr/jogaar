@@ -1,5 +1,5 @@
 from app.core import security, utils
-from app.data.crud import campaign, report, user
+from app.data.crud import campaign, misc, report, user
 from app.data.crud.campaign import Campaign, CampaignRead, State
 from app.data.crud.report import Report, Reportable, ReportCreate, ReportRead
 from app.data.crud.user import Access, User, UserRead
@@ -53,7 +53,7 @@ async def ban_user(
     return updated_u
 
 
-@router.post("/users/{id}/mod", response_model=UserRead)
+@router.post("/users/{id}/promote", response_model=UserRead)
 async def create_moderator(
     id: int,
     status: bool,
@@ -67,6 +67,13 @@ async def create_moderator(
     updated_u = user.read(id, db)
 
     return updated_u
+
+
+@router.get("/modmins", response_model=list[UserRead])
+async def read_modmins(
+    limit: int = 100, offset: int = 0, db: Session = Depends(get_db)
+) -> list[User]:
+    return misc.read_all_modmins(limit, offset, db)
 
 
 @router.post("/campaigns/{id}/greenlight", response_model=CampaignRead)

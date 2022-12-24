@@ -22,4 +22,8 @@ async def login_user(
 
     access_token = security.create_access_token(data={"user_id": existing_u.id})
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "access_level": existing_u.access_level,
+    }

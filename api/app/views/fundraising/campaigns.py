@@ -94,6 +94,13 @@ async def delete_campaign(
     campaign.delete(id, db)
 
 
+@router.get("/campaigns/ended", response_model=list[CampaignRead])
+async def read_ended_campaigns(
+    limit: int = 100, offset: int = 0, db: Session = Depends(get_db)
+) -> list[Campaign]:
+    return campaign.read_all_by_state(State.ENDED, limit, offset, db)
+
+
 @router.get("/campaigns/{id}", response_model=CampaignRead)
 async def read_campaign(id: int, db: Session = Depends(get_db)) -> Campaign:
     existing_c = utils.get_existing_campaign(id, db)

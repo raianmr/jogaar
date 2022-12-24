@@ -98,6 +98,16 @@ def read_all_by_campaigner(
     )
 
 
+def read_all_by_state(s: State, limit: int, offset: int, db: Session) -> list[Campaign]:
+    return (
+        db.query(Campaign)
+        .filter(Campaign.current_state == s)
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
+
+
 def read_all(limit: int, offset: int, db: Session) -> list[Campaign]:
     return db.query(Campaign).limit(limit).offset(offset).all()
 

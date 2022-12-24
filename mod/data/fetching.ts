@@ -1,13 +1,16 @@
 import useSWR, { Fetcher } from "swr"
 
-import { User } from "./models"
-import * as store from "./store"
+import { Campaign, LoginData, Report, TokenData, User } from "./models"
+import { getToken } from "./store"
 
 // TODO user env.local for these
 const ROOT = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
 const API_URLs = {
   LOGIN: `${ROOT}/login`,
   CURRENT_USER: `${ROOT}/users/current`,
+  MODMINS: `${ROOT}/modmins`,
+  ENDED_CAMPAIGNS: `${ROOT}/campaigns/ended`,
+  REPORTS: `${ROOT}/reports`,
 } as const
 
 export class FetchError extends Error {
@@ -25,14 +28,11 @@ export class FetchError extends Error {
   }
 }
 
-export const tokenDataFetcher: Fetcher<
-  store.TokenData,
-  store.LoginData
-> = async ({ username, password }) => {
+export const tokenDataFetcher: Fetcher<TokenData, LoginData> = async creds => {
   const resp = await fetch(API_URLs.LOGIN, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `username=${username}&password=${password}`,
+    body: `username=${creds.username}&password=${creds.password}`,
   })
 
   if (!resp.ok) {
@@ -42,13 +42,13 @@ export const tokenDataFetcher: Fetcher<
   return resp.json()
 }
 
-export const userFetcher: Fetcher<User, string> = async url => {
-  const token = store.getToken()
-
+export const miscFetcher: Fetcher<any, string> = async <T>(
+  url: string
+): Promise<T> => {
   const resp = await fetch(url, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${getToken()}`,
     },
   })
 
@@ -59,13 +59,13 @@ export const userFetcher: Fetcher<User, string> = async url => {
   return resp.json()
 }
 
-export function useUser(): [User | undefined, boolean] {
-  const { data, error } = useSWR<User, FetchError>(
-    API_URLs.CURRENT_USER,
-    userFetcher
-  )
+export const useMisc = <T>(url: string): [T | undefined, boolean] => {
+  const { data, error } = useSWR<T, FetchError>(url, miscFetcher)
 
-  const loggedOut = error !== undefined
-
-  return [data, loggedOut]
+  return [data, error !== undefined]
 }
+
+export const useUser = () => useMisc<User>(API_URLs.CURRENT_USER)
+export const useModmins = () => useMisc<User[]>(API_URLs.MODMINS)
+export const useCampaigns = () => useMisc<Campaign[]>(API_URLs.ENDED_CAMPAIGNS)
+export const useReports = () => useMisc<Report[]>(API_URLs.REPORTS)
