@@ -1,17 +1,11 @@
-export interface Base {
+export type Base = {
   id: number
   created_at: Date
 }
 
-export enum State {
-  DRAFT = "draft",
-  STARTED = "started",
-  ENDED = "ended",
-  LOCKED = "locked",
-  GREENLIT = "greenlit",
-}
+export type State = "draft" | "started" | "ended" | "locked" | "greenlit"
 
-export interface Campaign extends Base {
+export type Campaign = Base & {
   campaigner_id: number
 
   title: string
@@ -25,16 +19,12 @@ export interface Campaign extends Base {
   current_state: State
 }
 
-export enum Access {
-  BANNED = "banned",
-  NORMAL = "normal",
-  MOD = "mod",
-  ADMIN = "admin",
-}
+export type Access = "banned" | "normal" | "mod" | "admin"
 
-export interface User extends Base {
+export type User = Base & {
   name: string
   email: string
+
   about: string
   contact: string
   address: string
