@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from app.data.crud import bookmark, campaign, image, reply, update
+from app.data.crud import bookmark, campaign, image, reply, report, update
 from app.data.crud.campaign import Campaign
 from app.data.crud.reply import Reply
 from app.data.crud.update import Update
@@ -113,6 +113,22 @@ def get_existing_bookmark(u_id: int, c_id: int, db: Session) -> bookmark.Bookmar
         raise BookmarkNotFoundErr
 
     return existing_b
+
+
+class ReportNotFoundErr(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="report was not found",
+        )
+
+
+def get_existing_report(report_id: int | Column, db: Session) -> report.Report:
+    existing_report = report.read(report_id, db)
+    if existing_report is None:
+        raise ReportNotFoundErr
+
+    return existing_report
 
 
 def has_crossed_deadline(c: Campaign) -> bool:

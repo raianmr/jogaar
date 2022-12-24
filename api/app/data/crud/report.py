@@ -59,3 +59,9 @@ def read(id: int | sa.Column, db: Session) -> Report | None:
 
 def read_all(limit: int, offset: int, db: Session) -> list[Report]:
     return db.query(Report).limit(limit).offset(offset).all()
+
+
+def delete(id: int | sa.Column, db: Session) -> None:
+    db.query(Report).filter(Report.id == id).delete()
+
+    db.commit()

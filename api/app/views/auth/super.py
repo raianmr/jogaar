@@ -53,7 +53,7 @@ async def ban_user(
     return updated_u
 
 
-@router.post("/users/{id}/promote", response_model=UserRead)
+@router.post("/users/{id}/mod", response_model=UserRead)
 async def create_moderator(
     id: int,
     status: bool,
@@ -125,6 +125,17 @@ async def create_report(
         raise utils.MiscConflictErr
 
     return new_report
+
+
+@router.delete("/reports/{id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_report(
+    id: int,
+    db: Session = Depends(get_db),
+    curr_u: User = Depends(security.get_current_super_user),
+) -> None:
+    existing_report = utils.get_existing_report(id, db)
+
+    report.delete(existing_report.id, db)
 
 
 @router.get("/reports/{id}", response_model=ReportRead)

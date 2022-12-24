@@ -13,17 +13,17 @@ export default function Navbar() {
             <ul className="navbar-nav me-auto mb-2 mb-md-0">
               <li className="nav-item">
                 <Link className="nav-link" href="/modmins">
-                  modmins
+                  Modmins
                 </Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link" href="/campaigns">
-                  campaigns
+                  Campaigns
                 </Link>
               </li>
               <li className="nav-item">
                 <Link className="nav-link" href="/reports">
-                  reports
+                  Reports
                 </Link>
               </li>
               <li className="nav-item">

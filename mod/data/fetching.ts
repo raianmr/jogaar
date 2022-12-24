@@ -1,6 +1,6 @@
 import useSWR, { Fetcher } from "swr"
 
-import { Campaign, LoginData, Report, TokenData, User } from "./models"
+import { Campaign, LoginData, Report, State, TokenData, User } from "./models"
 import { getToken } from "./store"
 
 // TODO user env.local for these
@@ -69,3 +69,65 @@ export const useUser = () => useMisc<User>(API_URLs.CURRENT_USER)
 export const useModmins = () => useMisc<User[]>(API_URLs.MODMINS)
 export const useCampaigns = () => useMisc<Campaign[]>(API_URLs.ENDED_CAMPAIGNS)
 export const useReports = () => useMisc<Report[]>(API_URLs.REPORTS)
+
+export const alterState = async (
+  campaign_id: number,
+  new_state: State,
+  status: boolean
+): Promise<Campaign> => {
+  const resp = await fetch(
+    `${ROOT}/campaigns/${campaign_id}/${new_state}?status=${status}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    }
+  )
+  const data = await resp.json()
+
+  if (!resp.ok) {
+    throw new FetchError(resp.statusText, resp, data)
+  }
+
+  return data
+}
+
+export const alterAccess = async (
+  user_id: number,
+  new_access: State,
+  status: boolean
+): Promise<User> => {
+  const resp = await fetch(
+    `${ROOT}/users/${user_id}/${new_access}?status=${status}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    }
+  )
+  const data = await resp.json()
+
+  if (!resp.ok) {
+    throw new FetchError(resp.statusText, resp, data)
+  }
+
+  return data
+}
+
+export const dismissReport = async (report_id: number): Promise<void> => {
+  const resp = await fetch(`${ROOT}/reports/${report_id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  })
+  const data = await resp.json()
+
+  if (!resp.ok) {
+    throw new FetchError(resp.statusText, resp, data)
+  }
+
+  return data
+}
