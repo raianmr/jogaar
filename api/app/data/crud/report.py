@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 
-class ContentType(str, Enum):
+class Reportable(str, Enum):
     USER = "user"
     CAMPAIGN = "campaign"
     REPLY = "reply"
@@ -21,7 +21,7 @@ class Report(Base):
 
     content_id = sa.Column(sa.Integer, nullable=False)
     content_type = sa.Column(
-        sa.String, server_default=ContentType.CAMPAIGN, nullable=False
+        sa.String, server_default=Reportable.CAMPAIGN, nullable=False
     )
 
     __table_args__ = tuple(sa.UniqueConstraint(reporter_id, content_type, content_id))
@@ -31,7 +31,7 @@ class ReportCreate(BaseModel):
     description: str
 
     content_id: int
-    content_type: ContentType
+    content_type: Reportable
 
 
 class ReportRead(BaseRead):
@@ -40,7 +40,7 @@ class ReportRead(BaseRead):
     description: str
 
     content_id: int
-    content_type: ContentType
+    content_type: Reportable
 
 
 def create(_reporter_id: int | sa.Column, r: ReportCreate, db: Session) -> Report:

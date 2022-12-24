@@ -1,7 +1,7 @@
 from app.core import security, utils
 from app.data.crud import campaign, report, user
 from app.data.crud.campaign import Campaign, CampaignRead, State
-from app.data.crud.report import ContentType, Report, ReportCreate, ReportRead
+from app.data.crud.report import Report, Reportable, ReportCreate, ReportRead
 from app.data.crud.user import Access, User, UserRead
 from app.data.session import get_db
 from fastapi import APIRouter, Depends, HTTPException, status

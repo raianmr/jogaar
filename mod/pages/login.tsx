@@ -1,35 +1,36 @@
 import { useRouter } from "next/router"
 import { FormEvent, useState } from "react"
-import { fetchTokenData } from "../data/fetching"
+import { tokenDataFetcher } from "../data/fetching"
 import { setToken } from "../data/store"
 
-// TODO read and implement https://hasura.io/blog/best-practices-of-using-jwt-with-graphql/
+// TODO https://hasura.io/blog/best-practices-of-using-jwt-with-graphql/
 
 export default function Login() {
+  const router = useRouter()
+
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [errorMsg, setErrorMsg] = useState("")
-  const router = useRouter()
 
-  const submit = async (e: FormEvent) => {
+  const submitHandler = async (e: FormEvent) => {
     e.preventDefault()
 
     try {
-      const data = await fetchTokenData(username, password)
+      const data = await tokenDataFetcher({ username, password })
 
       setErrorMsg("")
       setToken(data)
-      console.log(data)
 
       router.push("/dashboard")
+      // console.log(data)
     } catch (e: any) {
-      setErrorMsg(e.data.detail)
+      setErrorMsg(e.message)
     }
   }
 
   return (
     <main>
-      <form className="form-signin" onSubmit={submit}>
+      <form className="form-signin" onSubmit={submitHandler}>
         <h1 className="h3 mb-3 font-weight-normal text-center">
           Enter credentials
         </h1>

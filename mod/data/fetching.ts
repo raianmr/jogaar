@@ -1,67 +1,71 @@
+import useSWR, { Fetcher } from "swr"
+
 import { User } from "./models"
-import { getToken, TokenData } from "./store"
+import * as store from "./store"
+
+// TODO user env.local for these
+const ROOT = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
+const API_URLs = {
+  LOGIN: `${ROOT}/login`,
+  CURRENT_USER: `${ROOT}/users/current`,
+} as const
 
 export class FetchError extends Error {
-  resp: Response
+  message: string
+  response: Response
   data: { detail: [] }
 
-  constructor({
-    message: message,
-    resp: resp,
-    data: data,
-  }: {
-    message: string
-    resp: Response
-    data: { detail: [] }
-  }) {
-    super(message)
+  constructor(msg: string, resp: Response, data: { detail: [] }) {
+    super(msg)
 
     this.name = "FetchError"
-    this.resp = resp
-    this.data = data ?? { detail: message }
+    this.message = msg
+    this.response = resp
+    this.data = data ?? { detail: msg }
   }
 }
 
-export async function fetchJson<json>(
-  input: RequestInfo,
-  init?: RequestInit
-): Promise<json> {
-  const resp = await fetch(input, init)
-  const data = await resp.json()
-
-  if (resp.ok) {
-    return data
-  }
-
-  throw new FetchError({
-    message: resp.statusText,
-    resp: resp,
-    data,
-  })
-}
-
-export async function fetchCurrentUser(): Promise<User> {
-  const data = await fetchJson(
-    `${process.env.NEXT_PUBLIC_API_CURRENT_USER_URL}`,
-    {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      body: `Bearer ${getToken()}`,
-    }
-  )
-
-  return data as User
-}
-
-export async function fetchTokenData(
-  username: string,
-  password: string
-): Promise<TokenData> {
-  const data = await fetchJson(`${process.env.NEXT_PUBLIC_API_LOGIN_URL}`, {
+export const tokenDataFetcher: Fetcher<
+  store.TokenData,
+  store.LoginData
+> = async ({ username, password }) => {
+  const resp = await fetch(API_URLs.LOGIN, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `username=${username}&password=${password}`,
   })
 
-  return data as TokenData
+  if (!resp.ok) {
+    throw new FetchError(resp.statusText, resp, await resp.json())
+  }
+
+  return resp.json()
+}
+
+export const userFetcher: Fetcher<User, string> = async url => {
+  const token = store.getToken()
+
+  const resp = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  if (!resp.ok) {
+    throw new FetchError(resp.statusText, resp, await resp.json())
+  }
+
+  return resp.json()
+}
+
+export function useUser(): [User | undefined, boolean] {
+  const { data, error } = useSWR<User, FetchError>(
+    API_URLs.CURRENT_USER,
+    userFetcher
+  )
+
+  const loggedOut = error !== undefined
+
+  return [data, loggedOut]
 }
