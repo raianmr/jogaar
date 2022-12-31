@@ -1,3 +1,4 @@
+import { ChakraProvider } from "@chakra-ui/react"
 import type { AppProps } from "next/app"
 import Head from "next/head"
 import { SWRConfig } from "swr"
@@ -21,11 +22,13 @@ export default function App({ Component, pageProps }: AppProps) {
             console.error(err)
           },
         }}>
-        <Navbar />
+        <ChakraProvider>
+          <Navbar />
 
-        <Component {...pageProps} />
+          <Component {...pageProps} />
 
-        <Footer />
+          <Footer />
+        </ChakraProvider>
       </SWRConfig>
     </>
   )

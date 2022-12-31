@@ -10,7 +10,7 @@ export default function Home() {
     if (loggedOut) {
       router.push("/login")
     } else {
-      router.push("/modmins")
+      router.push("/supers")
     }
   })
 

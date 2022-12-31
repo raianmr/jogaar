@@ -1,22 +1,38 @@
+import {
+  Box,
+  Button,
+  Card,
+  CardBody,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Heading,
+  Input,
+  Stack,
+  useToast,
+  VStack,
+} from "@chakra-ui/react"
+import Image from "next/image"
 import { useRouter } from "next/router"
 import { FormEvent, useEffect, useState } from "react"
 import { fetchTokenData } from "../data/fetching"
 import { getToken, setToken } from "../data/store"
+import Logo from "../public/logo.svg"
 
 // TODO https://hasura.io/blog/best-practices-of-using-jwt-with-graphql/
 
 export default function Login() {
+  const toast = useToast()
   const router = useRouter()
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
-  const [errorMsg, setErrorMsg] = useState("")
 
   useEffect(() => {
     const token = getToken()
 
     if (token) {
-      router.push("/modmins")
+      router.push("/supers")
     }
   })
 
@@ -30,46 +46,78 @@ export default function Login() {
         throw new Error("Forbidden")
       }
 
-      setErrorMsg("")
       setToken(data)
 
-      router.push("/modmins")
+      router.push("/supers")
     } catch (e: any) {
-      setErrorMsg(e.message)
+      toast({
+        title: e.message,
+        description: e.data.detail,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      })
     }
   }
 
+  // not sure about the science behind this but onBlur just seems more natural
+  const [unfocusedUsername, setUnfocusedUsername] = useState(false)
+  const [unfocusedPassword, setUnfocusedPassword] = useState(false)
+
   return (
-    <main>
-      <form className="form-signin" onSubmit={submitHandler}>
-        <h1 className="h3 mb-3 font-weight-normal text-center">
+    <Box>
+      <VStack as="header" spacing="6" mt="8">
+        <Image alt="Jogaar Mods logo" src={Logo} />
+        <Heading as="h1" fontWeight="thin" fontSize="24px">
           Enter credentials
-        </h1>
-        <input
-          type="email"
-          className="form-control"
-          placeholder="Email"
-          required
-          onChange={e => setUsername(e.target.value)}
-        />
-        <input
-          type="password"
-          className="form-control"
-          placeholder="Password"
-          required
-          onChange={e => setPassword(e.target.value)}
-        />
+        </Heading>
+        <Card variant="outline" w="300px">
+          <CardBody>
+            <form onSubmit={submitHandler}>
+              <Stack spacing="4">
+                <FormControl isInvalid={username === "" && unfocusedUsername}>
+                  <FormLabel>Email address</FormLabel>
+                  <Input
+                    size="sm"
+                    type="email"
+                    bg="white"
+                    borderRadius="6px"
+                    required
+                    placeholder="user@example.com"
+                    onBlur={() => setUnfocusedUsername(true)}
+                    onChange={e => setUsername(e.target.value)}
+                  />
+                  <FormErrorMessage>{"invalid username"}</FormErrorMessage>
+                </FormControl>
+                <FormControl isInvalid={password === "" && unfocusedPassword}>
+                  <FormLabel>Password</FormLabel>
+                  <Input
+                    size="sm"
+                    type="password"
+                    bg="white"
+                    borderRadius="6px"
+                    required
+                    placeholder={"*".repeat(8)}
+                    onBlur={() => setUnfocusedPassword(true)}
+                    onChange={e => setPassword(e.target.value)}
+                  />
+                  <FormErrorMessage>{"invalid password"}</FormErrorMessage>
+                </FormControl>
 
-        <button className="w-100 btn btn-lg btn-primary" type="submit">
-          Sign in
-        </button>
-
-        {errorMsg && (
-          <p className="p-1 mt-2 w-100 alert alert-danger text-center">
-            {errorMsg}
-          </p>
-        )}
-      </form>
-    </main>
+                <Button
+                  bg="OliveDrab"
+                  color="white"
+                  size="sm"
+                  type="submit"
+                  _hover={{ bg: "Olive" }}
+                  _active={{ bg: "DarkOliveGreen" }}>
+                  Sign in
+                </Button>
+              </Stack>
+            </form>
+          </CardBody>
+        </Card>
+      </VStack>
+    </Box>
   )
 }

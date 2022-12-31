@@ -69,11 +69,11 @@ async def create_moderator(
     return updated_u
 
 
-@router.get("/modmins", response_model=list[UserRead])
-async def read_modmins(
+@router.get("/super", response_model=list[UserRead])
+async def read_super_users(
     limit: int = 100, offset: int = 0, db: Session = Depends(get_db)
 ) -> list[User]:
-    return misc.read_all_modmins(limit, offset, db)
+    return misc.read_all_super(limit, offset, db)
 
 
 @router.post("/campaigns/{id}/greenlight", response_model=CampaignRead)

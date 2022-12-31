@@ -20,7 +20,7 @@ export class FetchError extends Error {
 }
 
 export const fetchTokenData: Fetcher<TokenData, LoginData> = async creds => {
-  const resp = await fetch(URL.API.LOGIN, {
+  const resp = await fetch(URL.API.SUPER_LOGIN, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `username=${creds.username}&password=${creds.password}`,
@@ -55,7 +55,7 @@ const useResource = <T>(url: string): [T | undefined, boolean] => {
 }
 
 export const useUser = () => useResource<User>(URL.API.CURRENT)
-export const useModmins = () => useResource<User[]>(URL.API.MODMINS)
+export const useSupers = () => useResource<User[]>(URL.API.SUPERS)
 export const useCampaigns = () => useResource<Campaign[]>(URL.API.ENDED)
 export const useReports = () => useResource<Report[]>(URL.API.REPORTS())
 

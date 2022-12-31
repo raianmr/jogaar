@@ -7,12 +7,12 @@ export const Env = {
 export const URL = {
   API: {
     ROOT: Env.API,
-    LOGIN: `${Env.API}/login`,
+    SUPER_LOGIN: `${Env.API}/login/super`,
     MOD: (id: number, status: boolean) =>
       `${Env.API}/users/${id}/mod?status=${status}`,
     BAN: (id: number, status: boolean) =>
       `${Env.API}/users/${id}/ban?status=${status}`,
-    MODMINS: `${Env.API}/modmins`,
+    SUPERS: `${Env.API}/super`,
     GREENLIGHT: (id: number, status: boolean) =>
       `${Env.API}/campaigns/${id}/greenlight?status=${status}`,
     LOCK: (id: number, status: boolean) =>
