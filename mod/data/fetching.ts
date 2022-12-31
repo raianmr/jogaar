@@ -1,17 +1,8 @@
 import useSWR, { Fetcher } from "swr"
 
-import { Campaign, LoginData, Report, State, TokenData, User } from "./models"
+import { URL } from "./config"
+import { Campaign, LoginData, Report, TokenData, User } from "./models"
 import { getToken } from "./store"
-
-// TODO user env.local for these
-const ROOT = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
-const API_URLs = {
-  LOGIN: `${ROOT}/login`,
-  CURRENT_USER: `${ROOT}/users/current`,
-  MODMINS: `${ROOT}/modmins`,
-  ENDED_CAMPAIGNS: `${ROOT}/campaigns/ended`,
-  REPORTS: `${ROOT}/reports`,
-} as const
 
 export class FetchError extends Error {
   message: string
@@ -28,8 +19,8 @@ export class FetchError extends Error {
   }
 }
 
-export const tokenDataFetcher: Fetcher<TokenData, LoginData> = async creds => {
-  const resp = await fetch(API_URLs.LOGIN, {
+export const fetchTokenData: Fetcher<TokenData, LoginData> = async creds => {
+  const resp = await fetch(URL.API.LOGIN, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `username=${creds.username}&password=${creds.password}`,
@@ -42,9 +33,7 @@ export const tokenDataFetcher: Fetcher<TokenData, LoginData> = async creds => {
   return resp.json()
 }
 
-export const miscFetcher: Fetcher<any, string> = async <T>(
-  url: string
-): Promise<T> => {
+const fetch_: Fetcher<any, string> = async <T>(url: string): Promise<T> => {
   const resp = await fetch(url, {
     method: "GET",
     headers: {
@@ -59,66 +48,23 @@ export const miscFetcher: Fetcher<any, string> = async <T>(
   return resp.json()
 }
 
-export const useMisc = <T>(url: string): [T | undefined, boolean] => {
-  const { data, error } = useSWR<T, FetchError>(url, miscFetcher)
+const useResource = <T>(url: string): [T | undefined, boolean] => {
+  const { data, error } = useSWR<T, FetchError>(url, fetch_)
 
   return [data, error !== undefined]
 }
 
-export const useUser = () => useMisc<User>(API_URLs.CURRENT_USER)
-export const useModmins = () => useMisc<User[]>(API_URLs.MODMINS)
-export const useCampaigns = () => useMisc<Campaign[]>(API_URLs.ENDED_CAMPAIGNS)
-export const useReports = () => useMisc<Report[]>(API_URLs.REPORTS)
+export const useUser = () => useResource<User>(URL.API.CURRENT)
+export const useModmins = () => useResource<User[]>(URL.API.MODMINS)
+export const useCampaigns = () => useResource<Campaign[]>(URL.API.ENDED)
+export const useReports = () => useResource<Report[]>(URL.API.REPORTS())
 
-export const alterState = async (
-  campaign_id: number,
-  new_state: State,
-  status: boolean
-): Promise<Campaign> => {
-  const resp = await fetch(
-    `${ROOT}/campaigns/${campaign_id}/${new_state}?status=${status}`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    }
-  )
-  const data = await resp.json()
-
-  if (!resp.ok) {
-    throw new FetchError(resp.statusText, resp, data)
-  }
-
-  return data
-}
-
-export const alterAccess = async (
-  user_id: number,
-  new_access: State,
-  status: boolean
-): Promise<User> => {
-  const resp = await fetch(
-    `${ROOT}/users/${user_id}/${new_access}?status=${status}`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    }
-  )
-  const data = await resp.json()
-
-  if (!resp.ok) {
-    throw new FetchError(resp.statusText, resp, data)
-  }
-
-  return data
-}
-
-export const dismissReport = async (report_id: number): Promise<void> => {
-  const resp = await fetch(`${ROOT}/reports/${report_id}`, {
-    method: "DELETE",
+const mutate = async <T = void>(
+  url: string,
+  method: "POST" | "PUT" | "DELETE" = "POST"
+): Promise<T> => {
+  const resp = await fetch(url, {
+    method,
     headers: {
       Authorization: `Bearer ${getToken()}`,
     },
@@ -129,5 +75,26 @@ export const dismissReport = async (report_id: number): Promise<void> => {
     throw new FetchError(resp.statusText, resp, data)
   }
 
-  return data
+  return data as T
 }
+
+export const greenlight = (campaignID: number) =>
+  mutate(URL.API.GREENLIGHT(campaignID, true))
+export const ungreenlight = (campaignID: number) =>
+  mutate(URL.API.GREENLIGHT(campaignID, false))
+
+export const lock = (campaignID: number) =>
+  mutate(URL.API.LOCK(campaignID, true))
+export const unlock = (campaignID: number) =>
+  mutate(URL.API.LOCK(campaignID, false))
+
+export const promote = (userID: number) =>
+  mutate(URL.API.GREENLIGHT(userID, true))
+export const demote = (userID: number) =>
+  mutate(URL.API.GREENLIGHT(userID, false))
+
+export const ban = (userID: number) => mutate(URL.API.LOCK(userID, true))
+export const unban = (userID: number) => mutate(URL.API.LOCK(userID, false))
+
+export const dismiss = (reportID: number) =>
+  mutate(URL.API.REPORTS(reportID), "DELETE")

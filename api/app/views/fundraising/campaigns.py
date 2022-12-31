@@ -98,7 +98,9 @@ async def delete_campaign(
 async def read_ended_campaigns(
     limit: int = 100, offset: int = 0, db: Session = Depends(get_db)
 ) -> list[Campaign]:
-    return campaign.read_all_by_state(State.ENDED, limit, offset, db)
+    return campaign.read_all_by_states(
+        [State.ENDED, State.LOCKED, State.GREENLIT], limit, offset, db
+    )
 
 
 @router.get("/campaigns/{id}", response_model=CampaignRead)

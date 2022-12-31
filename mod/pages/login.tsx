@@ -1,6 +1,6 @@
 import { useRouter } from "next/router"
 import { FormEvent, useEffect, useState } from "react"
-import { tokenDataFetcher } from "../data/fetching"
+import { fetchTokenData } from "../data/fetching"
 import { getToken, setToken } from "../data/store"
 
 // TODO https://hasura.io/blog/best-practices-of-using-jwt-with-graphql/
@@ -24,7 +24,11 @@ export default function Login() {
     e.preventDefault()
 
     try {
-      const data = await tokenDataFetcher({ username, password })
+      const data = await fetchTokenData({ username, password })
+
+      if (["banned", "normal"].includes(data.access_level)) {
+        throw new Error("Forbidden")
+      }
 
       setErrorMsg("")
       setToken(data)

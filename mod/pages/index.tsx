@@ -7,7 +7,11 @@ export default function Home() {
   const [user, loggedOut] = useUser()
 
   useEffect(() => {
-    if (loggedOut) router.push("/login")
+    if (loggedOut) {
+      router.push("/login")
+    } else {
+      router.push("/modmins")
+    }
   })
 
   return <></>

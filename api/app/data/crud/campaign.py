@@ -98,10 +98,12 @@ def read_all_by_campaigner(
     )
 
 
-def read_all_by_state(s: State, limit: int, offset: int, db: Session) -> list[Campaign]:
+def read_all_by_states(
+    states: list[State], limit: int, offset: int, db: Session
+) -> list[Campaign]:
     return (
         db.query(Campaign)
-        .filter(Campaign.current_state == s)
+        .filter(Campaign.current_state.in_(states))
         .limit(limit)
         .offset(offset)
         .all()
