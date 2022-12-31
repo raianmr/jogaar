@@ -2,8 +2,8 @@ import { ChakraProvider } from "@chakra-ui/react"
 import type { AppProps } from "next/app"
 import Head from "next/head"
 import { SWRConfig } from "swr"
-import Footer from "../components/footer"
-import Navbar from "../components/navbar"
+import { Footer } from "../components/footer"
+import { Navbar } from "../components/navbar"
 
 import "bootstrap/dist/css/bootstrap.min.css"
 import "../styles/globals.css"
@@ -24,9 +24,9 @@ export default function App({ Component, pageProps }: AppProps) {
         }}>
         <ChakraProvider>
           <Navbar />
-
-          <Component {...pageProps} />
-
+          <main>
+            <Component {...pageProps} />
+          </main>
           <Footer />
         </ChakraProvider>
       </SWRConfig>

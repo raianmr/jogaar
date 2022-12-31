@@ -2,7 +2,6 @@ import Link from "next/link"
 import { useRouter } from "next/router"
 import { useEffect } from "react"
 import { useCampaigns, useUser } from "../data/fetching"
-import styles from "../styles/Dashboard.module.css"
 
 export default function Campaigns() {
   const router = useRouter()
@@ -14,7 +13,7 @@ export default function Campaigns() {
   })
 
   return (
-    <main className={styles.container}>
+    <main>
       <Link href="/">
         <Link href="/">{JSON.stringify(campaigns)}</Link>
       </Link>

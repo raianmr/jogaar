@@ -15,6 +15,7 @@ import {
 import Image from "next/image"
 import { useRouter } from "next/router"
 import { FormEvent, useEffect, useState } from "react"
+import { URLs } from "../data/config"
 import { fetchTokenData } from "../data/fetching"
 import { getToken, setToken } from "../data/store"
 import Logo from "../public/logo.svg"
@@ -32,7 +33,7 @@ export default function Login() {
     const token = getToken()
 
     if (token) {
-      router.push("/supers")
+      router.push(URLs.MOD.SUPERS)
     }
   })
 
@@ -48,7 +49,7 @@ export default function Login() {
 
       setToken(data)
 
-      router.push("/supers")
+      router.push(URLs.MOD.SUPERS)
     } catch (e: any) {
       toast({
         title: e.message,

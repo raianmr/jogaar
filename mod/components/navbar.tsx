@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { clearStore } from "../data/store"
 
-export default function Navbar() {
+export function Navbar() {
   return (
     <div>
       <nav className="navbar navbar-expand-md navbar-dark bg-dark mb-4">

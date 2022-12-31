@@ -1,6 +1,6 @@
 import useSWR, { Fetcher } from "swr"
 
-import { URL } from "./config"
+import { URLs } from "./config"
 import { Campaign, LoginData, Report, TokenData, User } from "./models"
 import { getToken } from "./store"
 
@@ -20,7 +20,7 @@ export class FetchError extends Error {
 }
 
 export const fetchTokenData: Fetcher<TokenData, LoginData> = async creds => {
-  const resp = await fetch(URL.API.SUPER_LOGIN, {
+  const resp = await fetch(URLs.API.SUPER_LOGIN, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `username=${creds.username}&password=${creds.password}`,
@@ -54,10 +54,10 @@ const useResource = <T>(url: string): [T | undefined, boolean] => {
   return [data, error !== undefined]
 }
 
-export const useUser = () => useResource<User>(URL.API.CURRENT)
-export const useSupers = () => useResource<User[]>(URL.API.SUPERS)
-export const useCampaigns = () => useResource<Campaign[]>(URL.API.ENDED)
-export const useReports = () => useResource<Report[]>(URL.API.REPORTS())
+export const useUser = () => useResource<User>(URLs.API.CURRENT)
+export const useSupers = () => useResource<User[]>(URLs.API.SUPERS)
+export const useCampaigns = () => useResource<Campaign[]>(URLs.API.ENDED)
+export const useReports = () => useResource<Report[]>(URLs.API.REPORTS())
 
 const mutate = async <T = void>(
   url: string,
@@ -79,22 +79,22 @@ const mutate = async <T = void>(
 }
 
 export const greenlight = (campaignID: number) =>
-  mutate(URL.API.GREENLIGHT(campaignID, true))
+  mutate(URLs.API.GREENLIGHT(campaignID, true))
 export const ungreenlight = (campaignID: number) =>
-  mutate(URL.API.GREENLIGHT(campaignID, false))
+  mutate(URLs.API.GREENLIGHT(campaignID, false))
 
 export const lock = (campaignID: number) =>
-  mutate(URL.API.LOCK(campaignID, true))
+  mutate(URLs.API.LOCK(campaignID, true))
 export const unlock = (campaignID: number) =>
-  mutate(URL.API.LOCK(campaignID, false))
+  mutate(URLs.API.LOCK(campaignID, false))
 
 export const promote = (userID: number) =>
-  mutate(URL.API.GREENLIGHT(userID, true))
+  mutate(URLs.API.GREENLIGHT(userID, true))
 export const demote = (userID: number) =>
-  mutate(URL.API.GREENLIGHT(userID, false))
+  mutate(URLs.API.GREENLIGHT(userID, false))
 
-export const ban = (userID: number) => mutate(URL.API.LOCK(userID, true))
-export const unban = (userID: number) => mutate(URL.API.LOCK(userID, false))
+export const ban = (userID: number) => mutate(URLs.API.LOCK(userID, true))
+export const unban = (userID: number) => mutate(URLs.API.LOCK(userID, false))
 
 export const dismiss = (reportID: number) =>
-  mutate(URL.API.REPORTS(reportID), "DELETE")
+  mutate(URLs.API.REPORTS(reportID), "DELETE")

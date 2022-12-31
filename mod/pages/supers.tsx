@@ -1,8 +1,8 @@
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { useEffect } from "react"
+import { URLs } from "../data/config"
 import { useSupers, useUser } from "../data/fetching"
-import styles from "../styles/Dashboard.module.css"
 
 export default function Supers() {
   const router = useRouter()
@@ -10,11 +10,11 @@ export default function Supers() {
   const [supers, errored] = useSupers()
 
   useEffect(() => {
-    if (loggedOut) router.push("/login")
+    if (loggedOut) router.push(URLs.MOD.LOGIN)
   })
 
   return (
-    <main className={styles.container}>
+    <main>
       <Link href="/">{JSON.stringify(supers)}</Link>
     </main>
   )

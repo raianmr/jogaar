@@ -4,9 +4,12 @@ export const Env = {
 } as const
 
 // TODO user env.local for these
-export const URL = {
+export const URLs = {
   API: {
     ROOT: Env.API,
+    OPENAPI: `${Env.API}/openapi.json`,
+    SWAGGER: `${Env.API}/docs`,
+    STATIC: `${Env.API}/static`,
     SUPER_LOGIN: `${Env.API}/login/super`,
     MOD: (id: number, status: boolean) =>
       `${Env.API}/users/${id}/mod?status=${status}`,
@@ -25,8 +28,16 @@ export const URL = {
   },
   WEB: {
     ROOT: Env.WEB,
+    CATALOGUE: `${Env.WEB}/catalogue`,
     LOGIN: `${Env.WEB}/login`,
     CAMPAIGNS: (id: number) => `${Env.WEB}/campaigns/${id}`,
     USERS: (id: number) => `${Env.WEB}/users/${id}`,
+  },
+  MOD: {
+    LOGIN: "/login",
+    SUPERS: "/supers",
+    CAMPAIGNS: "/campaigns",
+    REPORTS: "/reports",
+    RESET: "/reset",
   },
 } as const
