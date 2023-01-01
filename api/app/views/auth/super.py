@@ -71,7 +71,10 @@ async def create_moderator(
 
 @router.get("/super", response_model=list[UserRead])
 async def read_super_users(
-    limit: int = 100, offset: int = 0, db: Session = Depends(get_db)
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+    curr_u: User = Depends(security.get_current_super_user),
 ) -> list[User]:
     return misc.read_all_super(limit, offset, db)
 

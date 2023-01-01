@@ -9,35 +9,51 @@ export const URLs = {
     ROOT: Env.API,
     OPENAPI: `${Env.API}/openapi.json`,
     SWAGGER: `${Env.API}/docs`,
-    STATIC: `${Env.API}/static`,
-    SUPER_LOGIN: `${Env.API}/login/super`,
+
+    STATIC: (location: string) => `${Env.API}/${location}`,
+    IMAGE: (id: number) => `${Env.API}/images/${id}`,
+
+    LOGIN: `${Env.API}/login/super`,
+    CURRENT: `${Env.API}/users/current`,
     MOD: (id: number, status: boolean) =>
       `${Env.API}/users/${id}/mod?status=${status}`,
     BAN: (id: number, status: boolean) =>
       `${Env.API}/users/${id}/ban?status=${status}`,
-    SUPERS: `${Env.API}/super`,
+
     GREENLIGHT: (id: number, status: boolean) =>
       `${Env.API}/campaigns/${id}/greenlight?status=${status}`,
     LOCK: (id: number, status: boolean) =>
       `${Env.API}/campaigns/${id}/lock?status=${status}`,
-    REPORTS: (id?: number) => `${Env.API}/reports` + (id ? `/${id}` : ""),
-    USERS: (id?: number) => `${Env.API}/users` + (id ? `/${id}` : ""),
-    CURRENT: `${Env.API}/users/current`,
-    CAMPAIGNS: (id?: number) => `${Env.API}/campaigns` + (id ? `/${id}` : ""),
-    ENDED: `${Env.API}/campaigns/ended`,
+
+    USER: (id: number) => `${Env.API}/users/${id}`,
+    USERS: (limit: number = 10, offset: number = 0) =>
+      `${Env.API}/users?limit=${limit}&offset=${offset}`,
+    SUPERS: (limit: number = 10, offset: number = 0) =>
+      `${Env.API}/super?limit=${limit}&offset=${offset}`,
+
+    CAMPAIGN: (id: number) => `${Env.API}/campaigns/${id}`,
+    CAMPAIGNS: (limit: number = 10, offset: number = 0) =>
+      `${Env.API}/campaigns?limit=${limit}&offset=${offset}`,
+    ENDED: (limit: number = 10, offset: number = 0) =>
+      `${Env.API}/campaigns/ended?limit=${limit}&offset=${offset}`,
+
+    REPORT: (id: number) => `${Env.API}/reports/${id}`,
+    REPORTS: (limit: number = 10, offset: number = 0) =>
+      `${Env.API}/reports?limit=${limit}&offset=${offset}`,
   },
+
   WEB: {
     ROOT: Env.WEB,
     CATALOGUE: `${Env.WEB}/catalogue`,
     LOGIN: `${Env.WEB}/login`,
-    CAMPAIGNS: (id: number) => `${Env.WEB}/campaigns/${id}`,
-    USERS: (id: number) => `${Env.WEB}/users/${id}`,
+    CAMPAIGN: (id: number) => `${Env.WEB}/campaigns/${id}`,
+    PROFILE: (id: number) => `${Env.WEB}/users/${id}`,
   },
+
   MOD: {
     LOGIN: "/login",
     SUPERS: "/supers",
     CAMPAIGNS: "/campaigns",
     REPORTS: "/reports",
-    RESET: "/reset",
   },
 } as const

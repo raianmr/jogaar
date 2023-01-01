@@ -1,7 +1,7 @@
-import useSWR, { Fetcher } from "swr"
+import useSWR, { Fetcher, SWRConfiguration } from "swr"
 
 import { URLs } from "./config"
-import { Campaign, LoginData, Report, TokenData, User } from "./models"
+import { Campaign, Image, LoginData, Report, TokenData, User } from "./models"
 import { getToken } from "./store"
 
 export class FetchError extends Error {
@@ -20,7 +20,7 @@ export class FetchError extends Error {
 }
 
 export const fetchTokenData: Fetcher<TokenData, LoginData> = async creds => {
-  const resp = await fetch(URLs.API.SUPER_LOGIN, {
+  const resp = await fetch(URLs.API.LOGIN, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `username=${creds.username}&password=${creds.password}`,
@@ -33,7 +33,7 @@ export const fetchTokenData: Fetcher<TokenData, LoginData> = async creds => {
   return resp.json()
 }
 
-const fetch_: Fetcher<any, string> = async <T>(url: string): Promise<T> => {
+const fetcher: Fetcher<any, string> = async <T>(url: string): Promise<T> => {
   const resp = await fetch(url, {
     method: "GET",
     headers: {
@@ -48,18 +48,29 @@ const fetch_: Fetcher<any, string> = async <T>(url: string): Promise<T> => {
   return resp.json()
 }
 
-const useResource = <T>(url: string): [T | undefined, boolean] => {
-  const { data, error } = useSWR<T, FetchError>(url, fetch_)
+type Config = SWRConfiguration
+
+const useFetch = <T>(key: string, cfg?: Config): [T | undefined, boolean] => {
+  const { data, error } = useSWR<T, FetchError>(key, fetcher, cfg)
 
   return [data, error !== undefined]
 }
 
-export const useUser = () => useResource<User>(URLs.API.CURRENT)
-export const useSupers = () => useResource<User[]>(URLs.API.SUPERS)
-export const useCampaigns = () => useResource<Campaign[]>(URLs.API.ENDED)
-export const useReports = () => useResource<Report[]>(URLs.API.REPORTS())
+export const useUser = (cfg?: Config) => useFetch<User>(URLs.API.CURRENT, cfg)
 
-const mutate = async <T = void>(
+export const useImage = (id: number, cfg?: Config) =>
+  useFetch<Image>(URLs.API.IMAGE(id), cfg)
+
+export const useSupers = (limit = 10, offset = 0, cfg?: Config) =>
+  useFetch<User[]>(URLs.API.SUPERS(limit, offset), cfg)
+
+export const useCampaigns = (limit = 10, offset = 0, cfg?: Config) =>
+  useFetch<Campaign[]>(URLs.API.ENDED(limit, offset), cfg)
+
+export const useReports = (limit = 10, offset = 0, cfg?: Config) =>
+  useFetch<Report[]>(URLs.API.REPORTS(limit, offset), cfg)
+
+const mutator = async <T = void>(
   url: string,
   method: "POST" | "PUT" | "DELETE" = "POST"
 ): Promise<T> => {
@@ -79,22 +90,22 @@ const mutate = async <T = void>(
 }
 
 export const greenlight = (campaignID: number) =>
-  mutate(URLs.API.GREENLIGHT(campaignID, true))
+  mutator(URLs.API.GREENLIGHT(campaignID, true))
 export const ungreenlight = (campaignID: number) =>
-  mutate(URLs.API.GREENLIGHT(campaignID, false))
+  mutator(URLs.API.GREENLIGHT(campaignID, false))
 
 export const lock = (campaignID: number) =>
-  mutate(URLs.API.LOCK(campaignID, true))
+  mutator(URLs.API.LOCK(campaignID, true))
 export const unlock = (campaignID: number) =>
-  mutate(URLs.API.LOCK(campaignID, false))
+  mutator(URLs.API.LOCK(campaignID, false))
 
 export const promote = (userID: number) =>
-  mutate(URLs.API.GREENLIGHT(userID, true))
+  mutator(URLs.API.GREENLIGHT(userID, true))
 export const demote = (userID: number) =>
-  mutate(URLs.API.GREENLIGHT(userID, false))
+  mutator(URLs.API.GREENLIGHT(userID, false))
 
-export const ban = (userID: number) => mutate(URLs.API.LOCK(userID, true))
-export const unban = (userID: number) => mutate(URLs.API.LOCK(userID, false))
+export const ban = (userID: number) => mutator(URLs.API.LOCK(userID, true))
+export const unban = (userID: number) => mutator(URLs.API.LOCK(userID, false))
 
 export const dismiss = (reportID: number) =>
-  mutate(URLs.API.REPORTS(reportID), "DELETE")
+  mutator(URLs.API.REPORTS(reportID), "DELETE")

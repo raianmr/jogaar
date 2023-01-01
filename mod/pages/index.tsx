@@ -5,14 +5,11 @@ import { useUser } from "../data/fetching"
 
 export default function Home() {
   const router = useRouter()
-  const [user, loggedOut] = useUser()
+  const [user, loggedOut] = useUser({ shouldRetryOnError: false })
 
   useEffect(() => {
-    if (loggedOut) {
-      router.push(URLs.MOD.LOGIN)
-    } else {
-      router.push(URLs.MOD.SUPERS)
-    }
+    if (loggedOut) router.push(URLs.MOD.LOGIN)
+    else router.push(URLs.MOD.SUPERS)
   })
 
   return <></>

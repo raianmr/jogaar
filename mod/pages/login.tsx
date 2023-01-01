@@ -16,8 +16,8 @@ import Image from "next/image"
 import { useRouter } from "next/router"
 import { FormEvent, useEffect, useState } from "react"
 import { URLs } from "../data/config"
-import { fetchTokenData } from "../data/fetching"
-import { getToken, setToken } from "../data/store"
+import { fetchTokenData, useUser } from "../data/fetching"
+import { setToken } from "../data/store"
 import Logo from "../public/logo.svg"
 
 // TODO https://hasura.io/blog/best-practices-of-using-jwt-with-graphql/
@@ -25,16 +25,13 @@ import Logo from "../public/logo.svg"
 export default function Login() {
   const toast = useToast()
   const router = useRouter()
+  const [user, loggedOut] = useUser({ shouldRetryOnError: false })
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
 
   useEffect(() => {
-    const token = getToken()
-
-    if (token) {
-      router.push(URLs.MOD.SUPERS)
-    }
+    if (!loggedOut) router.push(URLs.MOD.SUPERS)
   })
 
   const submitHandler = async (e: FormEvent) => {
@@ -69,8 +66,12 @@ export default function Login() {
     <Box>
       <VStack as="header" spacing="6" mt="8">
         <Image alt="Jogaar Mods logo" src={Logo} />
-        <Heading as="h1" fontWeight="thin" fontSize="24px">
-          Enter credentials
+        <Heading
+          as="h1"
+          color="darkolivegreen"
+          fontWeight="thin"
+          fontSize="24px">
+          Sign in to proceed
         </Heading>
         <Card variant="outline" w="300px">
           <CardBody>
@@ -106,12 +107,12 @@ export default function Login() {
                 </FormControl>
 
                 <Button
-                  bg="OliveDrab"
+                  bg="olivedrab"
                   color="white"
                   size="sm"
                   type="submit"
-                  _hover={{ bg: "Olive" }}
-                  _active={{ bg: "DarkOliveGreen" }}>
+                  _hover={{ bg: "olive" }}
+                  _active={{ bg: "darkolivegreen" }}>
                   Sign in
                 </Button>
               </Stack>
