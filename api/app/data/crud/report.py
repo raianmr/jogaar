@@ -57,8 +57,14 @@ def read(id: int | sa.Column, db: Session) -> Report | None:
     return db.query(Report).filter(Report.id == id).first()
 
 
-def read_all(limit: int, offset: int, db: Session) -> list[Report]:
-    return db.query(Report).limit(limit).offset(offset).all()
+def read_all_desc(limit: int, offset: int, db: Session) -> list[Report]:
+    return (
+        db.query(Report)
+        .order_by(sa.desc(Report.created_at))
+        .limit(limit)
+        .offset(offset)
+        .all()
+    )
 
 
 def delete(id: int | sa.Column, db: Session) -> None:

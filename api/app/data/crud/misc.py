@@ -204,10 +204,11 @@ def vote_alerts(
     return db.execute(s).scalars().all()
 
 
-def read_all_super(limit: int, offset: int, db: Session) -> list[User]:
+def read_all_desc_super(limit: int, offset: int, db: Session) -> list[User]:
     return (
         db.query(User)
         .filter(User.access_level.in_([Access.MOD, Access.ADMIN]))
+        .order_by(sa.desc(User.created_at))
         .limit(limit)
         .offset(offset)
         .all()

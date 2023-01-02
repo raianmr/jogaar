@@ -76,7 +76,7 @@ async def read_super_users(
     db: Session = Depends(get_db),
     curr_u: User = Depends(security.get_current_super_user),
 ) -> list[User]:
-    return misc.read_all_super(limit, offset, db)
+    return misc.read_all_desc_super(limit, offset, db)
 
 
 @router.post("/campaigns/{id}/greenlight", response_model=CampaignRead)
@@ -161,6 +161,6 @@ async def read_reports(
     db: Session = Depends(get_db),
     curr_u: User = Depends(security.get_current_super_user),
 ) -> list[Report]:
-    all_reports = report.read_all(limit, offset, db)
+    all_reports = report.read_all_desc(limit, offset, db)
 
     return all_reports

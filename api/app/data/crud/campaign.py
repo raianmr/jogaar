@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 
 import sqlalchemy as sa
@@ -98,12 +98,13 @@ def read_all_by_campaigner(
     )
 
 
-def read_all_by_states(
+def read_all_desc_by_states(
     states: list[State], limit: int, offset: int, db: Session
 ) -> list[Campaign]:
     return (
         db.query(Campaign)
         .filter(Campaign.current_state.in_(states))
+        .order_by(Campaign.deadline)
         .limit(limit)
         .offset(offset)
         .all()
@@ -128,6 +129,16 @@ def update_pledged(c_id: int | sa.Column, amount: int | sa.Column, db: Session):
 
 def update_state(id: int | sa.Column, s: State, db: Session):
     db.query(Campaign).filter(Campaign.id == id).update({Campaign.current_state: s})
+
+    db.commit()
+
+
+# TODO https://docs.celeryq.dev/en/stable/userguide/periodic-tasks.html
+def update_all_ended(db: Session):
+    db.query(Campaign).filter(
+        Campaign.current_state == State.STARTED,
+        Campaign.deadline < datetime.now(timezone.utc),
+    ).update({Campaign.current_state: State.ENDED})
 
     db.commit()
 
