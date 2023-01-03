@@ -73,13 +73,13 @@ export default function Campaigns() {
   useEffect(() => {
     // TODO fix the issue of this getting called multiple times occasionally
     if (loggedOut && !user) {
-      toast({
-        title: "session error",
-        description: "try logging in again",
-        status: "info",
-        duration: 3000,
-        isClosable: true,
-      })
+      // toast({
+      //   title: "session error",
+      //   description: "try logging in again",
+      //   status: "info",
+      //   duration: 3000,
+      //   isClosable: true,
+      // })
 
       router.push(URLs.MOD.LOGIN)
     }

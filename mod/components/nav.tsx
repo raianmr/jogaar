@@ -39,7 +39,12 @@ export function Navbar() {
           </HStack>
           {!loggedOut && user && (
             <HStack spacing={8}>
-              <NavLink href={URLs.MOD.LOGIN} onClick={() => clearStore()}>
+              <NavLink
+                href={URLs.MOD.LOGIN}
+                onClick={() => {
+                  clearStore()
+                  router.push(URLs.MOD.LOGIN)
+                }}>
                 Reset
               </NavLink>
               <Profile user={user} />
