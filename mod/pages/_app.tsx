@@ -3,9 +3,8 @@ import type { AppProps } from "next/app"
 import Head from "next/head"
 import { SWRConfig } from "swr"
 import { Footer } from "../components/footer"
-import { Navbar } from "../components/navbar"
+import { Navbar } from "../components/nav"
 
-import "bootstrap/dist/css/bootstrap.min.css"
 import "../styles/globals.css"
 
 export default function App({ Component, pageProps }: AppProps) {

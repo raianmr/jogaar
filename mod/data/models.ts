@@ -63,3 +63,21 @@ export type LoginData = {
   username: string
   password: string
 }
+
+export const columns = {
+  supers: {
+    current: "current",
+    ban: "ban",
+    mod: "mod",
+  },
+  campaigns: {
+    ended: "ended",
+    greenlit: "greenlit",
+    locked: "locked",
+  },
+  reports: {
+    recents: "recents",
+    dismiss: "dismiss",
+  },
+}
+

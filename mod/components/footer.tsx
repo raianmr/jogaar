@@ -12,7 +12,7 @@ import Image from "next/image"
 import NextLink from "next/link"
 import { URLs } from "../data/config"
 import Logo from "../public/logo.svg"
-import { NavLink } from "./navlink"
+import { NavLink } from "./nav"
 
 const sections = {
   API: {

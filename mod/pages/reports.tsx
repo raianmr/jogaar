@@ -1,9 +1,10 @@
-import { useToast } from "@chakra-ui/react"
+import { Center, Container, Heading, useToast } from "@chakra-ui/react"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { useEffect } from "react"
 import { URLs } from "../data/config"
 import { useReports, useUser } from "../data/fetching"
+
 
 export default function Reports() {
   const toast = useToast()
@@ -16,6 +17,15 @@ export default function Reports() {
   })
 
   if (loggedOut) return <></>
+
+  return (
+    <Center>
+      <Heading fontSize="24px" fontWeight="medium" textAlign="center" mt="40px">
+        User Reports
+      </Heading>
+      <Container maxW="lg" px={4} py={10}></Container>
+    </Center>
+  )
 
   return (
     <main>

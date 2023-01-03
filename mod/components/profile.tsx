@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Button,
   Center,
   Menu,
@@ -8,30 +7,23 @@ import {
   MenuList,
 } from "@chakra-ui/react"
 import { URLs } from "../data/config"
-import { useImage } from "../data/fetching"
 import { User } from "../data/models"
-import { NavLink } from "./navlink"
+import { AvatarWrapper } from "./images"
+import { NavLink } from "./nav"
 
 export function Profile({ user }: { user: User }) {
-  // horrible hack lmao
-  const [image, errored] = useImage(user.portrait_id ?? 0, {
-    shouldRetryOnError: false,
-  })
-
   return (
     <Menu>
       <MenuButton as={Button} variant={"link"} cursor={"pointer"}>
-        {!errored && image && (
-          <Avatar size={"sm"} src={URLs.API.STATIC(image.location)} />
+        {user.portrait_id != null && (
+          <AvatarWrapper img_id={user.portrait_id} size={"sm"} />
         )}
       </MenuButton>
       <MenuList alignItems={"center"}>
         <br />
-        <Center>
-          {!errored && image && (
-            <Avatar size={"2xl"} src={URLs.API.STATIC(image.location)} />
-          )}
-        </Center>
+        {user.portrait_id != null && (
+          <AvatarWrapper img_id={user.portrait_id} size={"2xl"} />
+        )}
         <br />
         <Center>
           <NavLink href={URLs.WEB.PROFILE(user.id)}>

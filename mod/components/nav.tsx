@@ -1,12 +1,27 @@
-import { Card, CardBody, HStack } from "@chakra-ui/react"
+import { Card, CardBody, HStack, Link } from "@chakra-ui/react"
 import Image from "next/image"
+import NextLink from "next/link"
 import { useRouter } from "next/router"
 import { URLs } from "../data/config"
 import { useUser } from "../data/fetching"
 import { clearStore } from "../data/store"
 import Logo from "../public/logo.svg"
-import { NavLink } from "./navlink"
 import { Profile } from "./profile"
+
+export const NavLink: typeof Link = ({ children, ...props }) => (
+  <Link
+    as={NextLink}
+    px={1}
+    color="darkslategrey"
+    _hover={{
+      color: "olive",
+      outline: "2px dashed olive",
+      borderRadius: "6px",
+    }}
+    {...props}>
+    {children}
+  </Link>
+)
 
 export function Navbar() {
   const router = useRouter()
