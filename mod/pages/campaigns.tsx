@@ -9,13 +9,37 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import { CampaignCard } from "../components/cards"
 import { URLs } from "../data/config"
 import { useCampaigns, useUser } from "../data/fetching"
 
-function Page({ index }: { index: number }) {
-  const [campaigns, errored] = useCampaigns(9, index)
+type page = "start" | "middle" | "end"
+
+function Page({
+  index,
+  limit,
+  offset,
+  setPageType,
+}: {
+  index: number
+  limit: number
+  offset: number
+  setPageType?: Dispatch<SetStateAction<page>>
+}) {
+  const [campaigns, errored] = useCampaigns(limit, offset)
+
+  useEffect(() => {
+    if (setPageType !== undefined && campaigns !== undefined) {
+      if (index == 0) {
+        setPageType("start")
+      } else if (campaigns.length == 0) {
+        setPageType("end")
+      } else {
+        setPageType("middle")
+      }
+    }
+  })
 
   return (
     <SimpleGrid
@@ -27,7 +51,12 @@ function Page({ index }: { index: number }) {
       p={8}>
       {!errored &&
         campaigns?.map(campaign => (
-          <CampaignCard key={campaign.id} campaign={campaign} />
+          <CampaignCard
+            key={campaign.id}
+            campaign={campaign}
+            limit={limit}
+            offset={offset}
+          />
         ))}
     </SimpleGrid>
   )
@@ -38,6 +67,7 @@ export default function Campaigns() {
   const router = useRouter()
   const [user, loggedOut] = useUser()
 
+  const [pageType, setPageType] = useState<page>("start")
   const [pageIndex, setPageIndex] = useState(0)
 
   useEffect(() => {
@@ -63,15 +93,28 @@ export default function Campaigns() {
         <Heading size="xl" fontWeight="light">
           All ended campaigns
         </Heading>
-        <Page index={pageIndex} />
+        <Page
+          index={pageIndex}
+          limit={9}
+          offset={9 * pageIndex}
+          setPageType={setPageType}
+        />
         <div style={{ display: "none" }}>
-          <Page index={pageIndex + 1} />
+          <Page index={pageIndex + 1} limit={9} offset={9 * (pageIndex + 1)} />
         </div>
         {/* <Divider /> */}
         <Text fontWeight="light">showing page {pageIndex + 1}</Text>
         <ButtonGroup variant="link" colorScheme="green" spacing={4}>
-          <Button onClick={() => setPageIndex(pageIndex - 1)}>previous</Button>
-          <Button onClick={() => setPageIndex(pageIndex + 1)}>next</Button>
+          <Button
+            disabled={pageType === "start"}
+            onClick={() => setPageIndex(pageIndex - 1)}>
+            previous
+          </Button>
+          <Button
+            disabled={pageType === "end"}
+            onClick={() => setPageIndex(pageIndex + 1)}>
+            next
+          </Button>
         </ButtonGroup>
       </VStack>
     </Center>

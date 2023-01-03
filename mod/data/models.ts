@@ -34,7 +34,7 @@ export type User = Base & {
   access_level: Access
 }
 
-export type Image = {
+export type Image = Base & {
   uploader_id: number
 
   filename: string
@@ -44,7 +44,7 @@ export type Image = {
 
 export type Reportable = "user" | "campaign" | "reply"
 
-export type Report = {
+export type Report = Base & {
   reporter_id: number
 
   description: string

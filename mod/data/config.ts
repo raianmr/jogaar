@@ -26,19 +26,19 @@ export const URLs = {
       `${Env.API}/campaigns/${id}/lock?status=${status}`,
 
     USER: (id: number) => `${Env.API}/users/${id}`,
-    USERS: (limit: number = 10, offset: number = 0) =>
+    USERS: (limit: number, offset: number) =>
       `${Env.API}/users?limit=${limit}&offset=${offset}`,
-    SUPERS: (limit: number = 10, offset: number = 0) =>
+    SUPERS: (limit: number, offset: number) =>
       `${Env.API}/super?limit=${limit}&offset=${offset}`,
 
     CAMPAIGN: (id: number) => `${Env.API}/campaigns/${id}`,
-    CAMPAIGNS: (limit: number = 10, offset: number = 0) =>
+    CAMPAIGNS: (limit: number, offset: number) =>
       `${Env.API}/campaigns?limit=${limit}&offset=${offset}`,
-    ENDED: (limit: number = 10, offset: number = 0) =>
+    ENDED: (limit: number, offset: number) =>
       `${Env.API}/campaigns/ended?limit=${limit}&offset=${offset}`,
 
     REPORT: (id: number) => `${Env.API}/reports/${id}`,
-    REPORTS: (limit: number = 10, offset: number = 0) =>
+    REPORTS: (limit: number, offset: number) =>
       `${Env.API}/reports?limit=${limit}&offset=${offset}`,
   },
 

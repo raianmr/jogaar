@@ -1,5 +1,5 @@
-import useSWR, { Fetcher, SWRConfiguration } from "swr"
-
+import { Dispatch, SetStateAction } from "react"
+import useSWR, { Fetcher, mutate, SWRConfiguration } from "swr"
 import { URLs } from "./config"
 import { Campaign, Image, LoginData, Report, TokenData, User } from "./models"
 import { getToken } from "./store"
@@ -89,23 +89,37 @@ const mutator = async <T = void>(
   return data as T
 }
 
-export const greenlight = (campaignID: number) =>
-  mutator(URLs.API.GREENLIGHT(campaignID, true))
-export const ungreenlight = (campaignID: number) =>
-  mutator(URLs.API.GREENLIGHT(campaignID, false))
+export function toggleGreenlight(
+  campaign: Campaign,
+  limit: number,
+  offset: number
+) {
+  mutator(
+    URLs.API.GREENLIGHT(campaign.id, campaign.current_state !== "greenlit")
+  )
+  mutate(URLs.API.ENDED(limit, offset))
+}
 
-export const lock = (campaignID: number) =>
-  mutator(URLs.API.LOCK(campaignID, true))
-export const unlock = (campaignID: number) =>
-  mutator(URLs.API.LOCK(campaignID, false))
+export function toggleLock(
+  campaign: Campaign,
+  limit: number,
+  offset: number
+) {
+  mutator(URLs.API.LOCK(campaign.id, campaign.current_state !== "locked"))
+  mutate(URLs.API.ENDED(limit, offset))
+}
 
-export const promote = (userID: number) =>
-  mutator(URLs.API.GREENLIGHT(userID, true))
-export const demote = (userID: number) =>
-  mutator(URLs.API.GREENLIGHT(userID, false))
+export function toggleMod(user: User, limit: number, offset: number) {
+  mutator(URLs.API.MOD(user.id, user.access_level !== "mod"))
+  mutate(URLs.API.SUPERS(limit, offset))
+}
 
-export const ban = (userID: number) => mutator(URLs.API.LOCK(userID, true))
-export const unban = (userID: number) => mutator(URLs.API.LOCK(userID, false))
+export function toggleBan(user: User, limit: number, offset: number) {
+  mutator(URLs.API.MOD(user.id, user.access_level !== "banned"))
+  mutate(URLs.API.SUPERS(limit, offset))
+}
 
-export const dismiss = (reportID: number) =>
-  mutator(URLs.API.REPORTS(reportID), "DELETE")
+export function dismiss(report: Report, limit: number, offset: number) {
+  mutator(URLs.API.REPORT(report.id), "DELETE")
+  mutate(URLs.API.REPORTS(limit, offset))
+}

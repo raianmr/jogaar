@@ -101,6 +101,7 @@ async def read_ended_campaigns(
     db: Session = Depends(get_db),
     curr_u: User = Depends(security.get_current_super_user),
 ) -> list[Campaign]:
+    # TODO
     campaign.update_all_ended(db)
 
     return campaign.read_all_desc_by_states(
