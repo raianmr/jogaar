@@ -1,35 +1,122 @@
-import { Center, Container, Heading, useToast } from "@chakra-ui/react"
-import Link from "next/link"
+import {
+  Button,
+  ButtonGroup,
+  Center,
+  Heading,
+  SimpleGrid,
+  Text,
+  useToast,
+  VStack,
+} from "@chakra-ui/react"
 import { useRouter } from "next/router"
-import { useEffect } from "react"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
+import { ReportCard } from "../components/cards"
 import { URLs } from "../data/config"
 import { useReports, useUser } from "../data/fetching"
 
+type page = "start" | "middle" | "end"
 
-export default function Reports() {
+function Page({
+  index,
+  limit,
+  offset,
+  setPageType,
+}: {
+  index: number
+  limit: number
+  offset: number
+  setPageType?: Dispatch<SetStateAction<page>>
+}) {
+  const [reports, errored] = useReports(limit, offset)
+
+  useEffect(() => {
+    if (setPageType !== undefined && reports !== undefined) {
+      if (index == 0) {
+        setPageType("start")
+      } else if (reports.length == 0) {
+        setPageType("end")
+      } else {
+        setPageType("middle")
+      }
+    }
+  })
+
+  return (
+    <SimpleGrid
+      templateColumns={{
+        sm: "1fr 1fr",
+        md: `repeat(3, 1fr)`,
+      }}
+      spacing={4}
+      p={8}>
+      {!errored &&
+        reports?.map(report => (
+          <ReportCard
+            key={report.id}
+            report={report}
+            limit={limit}
+            offset={offset}
+          />
+        ))}
+    </SimpleGrid>
+  )
+}
+
+export default function Campaigns() {
   const toast = useToast()
   const router = useRouter()
   const [user, loggedOut] = useUser()
-  const [reports, errored] = useReports()
+
+  const [pageType, setPageType] = useState<page>("start")
+  const [pageIndex, setPageIndex] = useState(0)
 
   useEffect(() => {
-    if (loggedOut) router.push(URLs.MOD.LOGIN)
+    // TODO fix the issue of this getting called multiple times occasionally
+    if (loggedOut && !user) {
+      toast({
+        title: "session error",
+        description: "try logging in again",
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      })
+
+      router.push(URLs.MOD.LOGIN)
+    }
   })
 
   if (loggedOut) return <></>
 
   return (
     <Center>
-      <Heading fontSize="24px" fontWeight="medium" textAlign="center" mt="40px">
-        User Reports
-      </Heading>
-      <Container maxW="lg" px={4} py={10}></Container>
+      <VStack p={8}>
+        <Heading size="xl" fontWeight="light">
+          All existing reports
+        </Heading>
+        <Page
+          index={pageIndex}
+          limit={9}
+          offset={9 * pageIndex}
+          setPageType={setPageType}
+        />
+        <div style={{ display: "none" }}>
+          <Page index={pageIndex + 1} limit={9} offset={9 * (pageIndex + 1)} />
+        </div>
+        {/* <Divider /> */}
+        <Text fontWeight="light">showing page {pageIndex + 1}</Text>
+        <ButtonGroup variant="link" colorScheme="green" spacing={4}>
+          <Button
+            disabled={pageType === "start"}
+            onClick={() => setPageIndex(pageIndex - 1)}>
+            previous
+          </Button>
+          <Button
+            disabled={pageType === "end"}
+            onClick={() => setPageIndex(pageIndex + 1)}>
+            next
+          </Button>
+        </ButtonGroup>
+      </VStack>
     </Center>
-  )
-
-  return (
-    <main>
-      <Link href="/">{JSON.stringify(reports)}</Link>
-    </main>
   )
 }

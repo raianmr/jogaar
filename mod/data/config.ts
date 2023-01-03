@@ -1,3 +1,5 @@
+import { Reportable } from "./models"
+
 export const Env = {
   API: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000",
   WEB: process.env.NEXT_PUBLIC_WEB_URL ?? "http://localhost:3000",
@@ -48,6 +50,19 @@ export const URLs = {
     LOGIN: `${Env.WEB}/login`,
     CAMPAIGN: (id: number) => `${Env.WEB}/campaigns/${id}`,
     PROFILE: (id: number) => `${Env.WEB}/users/${id}`,
+    REPORT: (id: number) => `${Env.WEB}/reports/${id}`,
+    CONTENT: (id: number, type: Reportable) => {
+      switch (type) {
+        case "campaign":
+          return `${Env.WEB}/campaigns/${id}`
+        case "user":
+          return `${Env.WEB}/users/${id}`
+        case "reply":
+          return `${Env.WEB}/reports/${id}`
+        default:
+          return `${Env.WEB}/catalogue`
+      }
+    },
   },
 
   MOD: {

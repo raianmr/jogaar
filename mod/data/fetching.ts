@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction } from "react"
 import useSWR, { Fetcher, mutate, SWRConfiguration } from "swr"
 import { URLs } from "./config"
 import { Campaign, Image, LoginData, Report, TokenData, User } from "./models"
@@ -7,15 +6,15 @@ import { getToken } from "./store"
 export class FetchError extends Error {
   message: string
   response: Response
-  data: { detail: [] }
+  data: { detail: any[] }
 
-  constructor(msg: string, resp: Response, data: { detail: [] }) {
+  constructor(msg: string, resp: Response, data?: { detail: [] }) {
     super(msg)
 
     this.name = "FetchError"
     this.message = msg
     this.response = resp
-    this.data = data ?? { detail: msg }
+    this.data = data ?? { detail: [msg] }
   }
 }
 
@@ -72,7 +71,7 @@ export const useReports = (limit = 10, offset = 0, cfg?: Config) =>
 
 const mutator = async <T = void>(
   url: string,
-  method: "POST" | "PUT" | "DELETE" = "POST"
+  method: "POST" | "PUT" = "POST"
 ): Promise<T> => {
   const resp = await fetch(url, {
     method,
@@ -89,6 +88,19 @@ const mutator = async <T = void>(
   return data as T
 }
 
+const deleter = async (url: string): Promise<void> => {
+  const resp = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  })
+
+  if (!resp.ok) {
+    throw new FetchError(resp.statusText, resp)
+  }
+}
+
 export function toggleGreenlight(
   campaign: Campaign,
   limit: number,
@@ -100,11 +112,7 @@ export function toggleGreenlight(
   mutate(URLs.API.ENDED(limit, offset))
 }
 
-export function toggleLock(
-  campaign: Campaign,
-  limit: number,
-  offset: number
-) {
+export function toggleLock(campaign: Campaign, limit: number, offset: number) {
   mutator(URLs.API.LOCK(campaign.id, campaign.current_state !== "locked"))
   mutate(URLs.API.ENDED(limit, offset))
 }
@@ -120,6 +128,6 @@ export function toggleBan(user: User, limit: number, offset: number) {
 }
 
 export function dismiss(report: Report, limit: number, offset: number) {
-  mutator(URLs.API.REPORT(report.id), "DELETE")
+  deleter(URLs.API.REPORT(report.id))
   mutate(URLs.API.REPORTS(limit, offset))
 }
